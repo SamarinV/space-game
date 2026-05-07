@@ -1,4 +1,4 @@
-import s from './Enemy.module.scss'
+import s from './enemy.module.scss'
 import enemyImg from '../../assets/images/enemy1.png'
 
 type EnemyProps = {
