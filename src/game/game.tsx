@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import HUD from '../components/HUD/HUD'
 import Stars from '../components/stars/stars'
-import Spaceship from '../components/space-ship/spaceShip'
+import Spaceship from '../components/spaceShip/spaceShip'
 import Enemy from '../components/enemy/enemy'
 
 type EnemyType = {
