@@ -1,0 +1,164 @@
+.container {
+	position: fixed;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 180px;
+}
+
+.ship {
+	position: relative;
+	background: transparent;
+	width: 180px;
+	user-select: none;
+	pointer-events: none;
+	padding: 30px;
+	z-index: 100;
+}
+
+.activeShield {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background-color: rgba(31, 115, 249, 0.215);
+	z-index: 1;
+
+	animation: shieldPulse 3s ease-in-out infinite;
+
+	box-shadow:
+		0 0 10px rgba(31, 115, 249, 0.5),
+		0 0 25px rgba(31, 115, 249, 0.4),
+		0 0 50px rgba(31, 115, 249, 0.3);
+}
+
+@keyframes shieldPulse {
+	0% {
+		transform: scale(1);
+		opacity: 0.8;
+	}
+
+	50% {
+		transform: scale(1.05);
+		opacity: 1;
+	}
+
+	100% {
+		transform: scale(1);
+		opacity: 0.8;
+	}
+}
+
+.disabledShield {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	background: rgba(255, 40, 40, 0.12);
+	animation:
+		shieldBroken 4s infinite,
+		shieldFlicker 4s infinite;
+
+	box-shadow:
+		0 0 8px rgba(255, 0, 0, 0.2),
+		0 0 18px rgba(255, 0, 0, 0.1),
+		0 0 35px rgba(255, 0, 0, 0.2);
+}
+
+/* ⚡ дрожание поля */
+@keyframes shieldBroken {
+	0% {
+		transform: scale(1) translate(0px, 0px);
+	}
+
+	20% {
+		transform: scale(1.02) translate(-2px, 1px);
+	}
+
+	40% {
+		transform: scale(0.98) translate(2px, -1px);
+	}
+
+	60% {
+		transform: scale(1.03) translate(-1px, -2px);
+	}
+
+	80% {
+		transform: scale(0.99) translate(1px, 2px);
+	}
+
+	100% {
+		transform: scale(1) translate(0px, 0px);
+	}
+}
+
+/* 🔥 мигание */
+@keyframes shieldFlicker {
+	0% {
+		opacity: 0.4;
+	}
+
+	20% {
+		opacity: 0.6;
+	}
+
+	40% {
+		opacity: 0.25;
+	}
+
+	60% {
+		opacity: 0.9;
+	}
+
+	80% {
+		opacity: 0.4;
+	}
+
+	100% {
+		opacity: 0.6;
+	}
+}
+
+.hit {
+	animation: shipHit 0.3s ease;
+}
+
+@keyframes shipHit {
+	0% {
+		transform: translateX(-50%) scale(1);
+		filter: brightness(1);
+	}
+
+	20% {
+		transform: translateX(-48%) scale(1.05);
+		filter: brightness(2);
+	}
+
+	40% {
+		transform: translateX(-52%) scale(0.95);
+		filter: brightness(0.5);
+	}
+
+	60% {
+		transform: translateX(-49%) scale(1.03);
+		filter: brightness(2);
+	}
+
+	100% {
+		transform: translateX(-50%) scale(1);
+		filter: brightness(1);
+	}
+}
+
+.explosion {
+	position: absolute;
+	z-index: 2;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 200px;
+	height: 200px;
+	border-radius: 50%;
+	animation: explode 1s ease-out forwards;
+}

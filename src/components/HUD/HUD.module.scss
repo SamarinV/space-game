@@ -1,0 +1,94 @@
+.hud {
+	position: fixed;
+
+	bottom: 20px;
+	left: 20px;
+
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	z-index: 100;
+
+	color: white;
+	font-size: 20px;
+	font-family: sans-serif;
+}
+
+.item {
+	padding: 8px 24px;
+
+	background: rgb(140, 140, 140);
+
+	border: 1px solid rgba(91, 94, 253, 0.626);
+
+	border-radius: 12px;
+
+	backdrop-filter: blur(4px);
+}
+
+.rightTopBlock {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	display: flex;
+}
+.score {
+	padding: 8px 24px;
+	background: rgb(140, 140, 140);
+	border: 1px solid rgba(91, 94, 253, 0.626);
+	border-radius: 12px;
+	backdrop-filter: blur(4px);
+}
+
+.btn {
+	position: relative;
+
+	margin-left: 30px;
+	background: #8c8c8c;
+	background-image: url('../../assets/images/enemy1.png');
+	background-size: cover;
+	width: 40px;
+	height: 40px;
+
+	border: 1px solid rgba(91, 94, 253, 0.626);
+	border-radius: 12px;
+
+	cursor: pointer;
+	overflow: hidden;
+
+	transition: 0.2s;
+}
+
+.disabled {
+	opacity: 0.5;
+
+	&::before {
+		content: '';
+
+		position: absolute;
+		inset: 0;
+
+		background: rgba(0, 0, 0, 0.4);
+	}
+
+	&::after {
+		content: '';
+
+		position: absolute;
+
+		top: 50%;
+		left: -20%;
+
+		width: 140%;
+		height: 4px;
+
+		background: #ff0000;
+
+		transform: rotate(-45deg);
+
+		box-shadow:
+			0 0 8px #ff0000,
+			0 0 16px #ff0000;
+	}
+}

@@ -1,0 +1,26 @@
+.bullet {
+  position: absolute;
+
+  bottom: 120px;
+
+  width: 6px;
+  height: 20px;
+
+  background: cyan;
+
+  border-radius: 10px;
+
+  box-shadow: 0 0 10px cyan;
+
+  animation: shoot 1s linear forwards;
+}
+
+@keyframes shoot {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-120vh);
+  }
+}
