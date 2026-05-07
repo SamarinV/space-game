@@ -1,6 +1,6 @@
 import ship from '../../assets/images/ship.png'
 import explosion from '../../assets/images/explosion.png'
-import s from './Spaceship.module.scss'
+import s from './spaceship.module.scss'
 
 type Props = {
 	isActiveShield: boolean
