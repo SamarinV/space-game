@@ -117,7 +117,7 @@ const Game = () => {
 						setShipHit(false)
 					}, 300)
 
-					const damage = 1
+					const damage = 5
 					setSettings((prev) => applyDamage(prev, damage))
 
 					// удалить врага
