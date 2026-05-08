@@ -1,30 +1,92 @@
 import { useEffect, useState } from 'react'
 
-import HUD from '../components/HUD/HUD'
-import Stars from '../components/stars/stars'
-import Spaceship from '../components/spaceShip/spaceShip'
 import Enemy from '../components/enemy/enemy'
+import HUD from '../components/HUD/HUD'
+import Spaceship from '../components/spaceShip/spaceShip'
+import Stars from '../components/stars/stars'
+import { moveEnemy } from '../components/enemy/moveEnemy'
+import { applyDamage } from '../components/enemy/applyDamage'
 
-type EnemyType = {
+export type EnemyType = {
 	id: number
 	x: number
 	y: number
 }
 
+export type SettingsType = {
+	withEnemy: boolean
+	withDrones: boolean
+	withShield: boolean
+	score: number
+	shield: number
+	lives: number
+}
+
 const Game = () => {
 	const [enemy, setEnemy] = useState<EnemyType | null>(null)
-	const [lives, setLives] = useState(100)
-	const [shield, setShield] = useState(100)
-	const [isActiveShield, setIsActiveShield] = useState(true)
 	const [shipHit, setShipHit] = useState(false)
-	const [score, setScore] = useState(0)
-	const [withEnemy, setWithEnemy] = useState(true)
+
+	//Settings
+	//состояние кнопок верхний правый край
+	const [settings, setSettings] = useState<SettingsType>({
+		withEnemy: false,
+		withDrones: false,
+		withShield: false,
+		score: 0,
+		shield: 80,
+		lives: 80,
+	})
+
+	const shieldIsHolding = settings.withShield && settings.shield > 0
+
+	//восстановление жизней когда есть дроны каждые 2 секунды
+	useEffect(() => {
+		if (settings.withDrones) {
+			const interval = setInterval(() => {
+				setSettings((prev) => ({
+					...prev,
+					lives: Math.min(100, prev.lives + 1),
+				}))
+			}, 2000)
+
+			return () => clearInterval(interval)
+		}
+	}, [settings.withDrones])
+
+
+	//зарядка щита
+	useEffect(() => {
+		if (!settings.withShield && settings.shield < 100) {
+			const interval = setInterval(() => {
+				setSettings((prev) => ({
+					...prev,
+					shield: ( prev.shield + 1),
+				}))
+			}, 1000)
+
+			return () => clearInterval(interval)
+		}
+	}, [settings.withShield, settings.shield])
+
+	//расход щита когда включен каждые 5 секунд
+	useEffect(() => {
+		if (settings.withShield && settings.shield > 0) {
+			const interval = setInterval(() => {
+				setSettings((prev) => ({
+					...prev,
+					shield: Math.max(0, prev.shield - 1),
+				}))
+			}, 2000)
+
+			return () => clearInterval(interval)
+		}
+	}, [settings.withShield, settings.shield])
+
 
 	// 🚀 SPAWN (только если врага нет)
 	useEffect(() => {
-		console.log('withEnemy', withEnemy)
 		const interval = setInterval(() => {
-			if (withEnemy) {
+			if (settings.withEnemy) {
 				setEnemy((prev) => {
 					if (prev) return prev
 
@@ -38,39 +100,14 @@ const Game = () => {
 		}, 2000)
 
 		return () => clearInterval(interval)
-	}, [withEnemy])
+	}, [settings.withEnemy])
 
-	// 🚀 GAME LOOP (движение + коллизия)
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setEnemy((prev) => {
 				if (!prev) return null
 
-				const shipX = window.innerWidth / 2
-				const shipY = window.innerHeight - 150
-
-				// направление к кораблю
-				const dx = shipX - prev.x
-				const dy = shipY - prev.y
-
-				const length = Math.sqrt(dx * dx + dy * dy)
-				const speed = 2.5
-
-				const updated = {
-					...prev,
-					x: prev.x + (dx / length) * speed,
-					y: prev.y + (dy / length) * speed,
-				}
-
-				// 💥 расстояние до корабля
-				const distance = Math.sqrt((updated.x - shipX) ** 2 + (updated.y - shipY) ** 2)
-
-				let hit = false
-
-				// 💥 попадание
-				if (distance < 80) {
-					hit = true
-				}
+				const { updated, hit } = moveEnemy(prev)
 
 				// 💥 враг ушёл вниз или попал
 				if (updated.y > window.innerHeight - 500 || hit) {
@@ -80,23 +117,10 @@ const Game = () => {
 						setShipHit(false)
 					}, 300)
 
-					const damage = 5
+					const damage = 1
+					setSettings((prev) => applyDamage(prev, damage))
 
-					setShield((currentShield) => {
-						if (currentShield >= damage) {
-							return currentShield - damage
-						}
-
-						setIsActiveShield(false)
-
-						const remainingDamage = damage - currentShield
-
-						setLives((l) => Math.max(0, l - remainingDamage))
-
-						return 0
-					})
-
-					// 💥 убираем врага → новый появится сам
+					// удалить врага
 					return null
 				}
 
@@ -112,16 +136,31 @@ const Game = () => {
 	}
 
 	const handleEnemyClick = () => {
-		setScore((s) => s + 10)
+		setSettings((prev) => ({ ...prev, score: prev.score + 10 }))
 		removeEnemy()
 	}
 
-	const playPauseEnemy = () => {
-		if (withEnemy) {
-			setWithEnemy((prev) => !prev)
+	const onOffEnemy = () => {
+		if (settings.withEnemy) {
+			setSettings((prev) => ({ ...prev, withEnemy: false }))
 			setEnemy(null)
 		} else {
-			setWithEnemy((prev) => !prev)
+			setSettings((prev) => ({ ...prev, withEnemy: true }))
+		}
+	}
+	const onOffDrones = () => {
+		if (settings.withDrones) {
+			setSettings((prev) => ({ ...prev, withDrones: false }))
+		} else {
+			setSettings((prev) => ({ ...prev, withDrones: true }))
+		}
+	}
+
+	const onOffShield = () => {
+		if (settings.withShield) {
+			setSettings((prev) => ({ ...prev, withShield: false }))
+		} else {
+			setSettings((prev) => ({ ...prev, withShield: true }))
 		}
 	}
 
@@ -129,9 +168,9 @@ const Game = () => {
 		<>
 			<Stars />
 
-			<HUD lives={lives} shield={shield} score={score} playPauseEnemy={playPauseEnemy} withEnemy={withEnemy} />
+			<HUD onOffEnemy={onOffEnemy} onOffDrones={onOffDrones} onOffShield={onOffShield} settings={settings} />
 
-			<Spaceship isActiveShield={isActiveShield} shipHit={shipHit} />
+			<Spaceship withDrones={settings.withDrones} withShield={settings.withShield} shieldIsHolding={shieldIsHolding} shipHit={shipHit} />
 
 			{enemy && <Enemy id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />}
 		</>
