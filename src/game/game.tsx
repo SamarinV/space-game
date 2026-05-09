@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 
+import { toast } from 'react-toastify'
 import Enemy from '../components/enemy/enemy'
+import { moveEnemy } from '../components/enemy/moveEnemy'
 import HUD from '../components/HUD/HUD'
 import Spaceship from '../components/spaceShip/spaceShip'
 import Stars from '../components/stars/stars'
-import { moveEnemy } from '../components/enemy/moveEnemy'
-import { applyDamage } from '../components/enemy/applyDamage'
-import { toast } from 'react-toastify'
 
 export type EnemyType = {
 	id: number
@@ -30,10 +29,6 @@ const price = { drone: 10, shield: 10 }
 
 const Game = () => {
 	const [enemy, setEnemy] = useState<EnemyType | null>(null)
-	const [shipHit, setShipHit] = useState(false)
-
-	//Settings
-	//состояние кнопок верхний правый край
 	const [settings, setSettings] = useState<SettingsType>({
 		withRuble: true,
 		dronesLevel: 0,
@@ -234,12 +229,7 @@ const Game = () => {
 				settings={settings}
 			/>
 
-			<Spaceship
-				withDrones={settings.withDrones}
-				withShield={settings.withShield}
-				shieldIsHolding={shieldIsHolding}
-				shipHit={shipHit}
-			/>
+			<Spaceship withDrones={settings.withDrones} withShield={settings.withShield} shieldIsHolding={shieldIsHolding} />
 
 			{enemy && <Enemy id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />}
 		</>
