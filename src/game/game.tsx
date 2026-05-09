@@ -93,7 +93,7 @@ const Game = () => {
 
 					return {
 						id: Date.now(),
-						x: 100 + Math.random() * (window.innerWidth - 200 * 2),
+						x: 10 + Math.random() * (window.innerWidth - 55 * 2),
 						y: -60,
 					}
 				})
@@ -220,6 +220,7 @@ const Game = () => {
 			<Stars />
 
 			<HUD
+				price={price}
 				dronesLevel={settings.dronesLevel}
 				shieldLevel={settings.shieldLevel}
 				levelUpDrones={levelUpDrones}

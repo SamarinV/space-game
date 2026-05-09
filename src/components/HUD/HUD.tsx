@@ -15,9 +15,19 @@ type Props = {
 	levelUpShield: () => void
 	dronesLevel: number
 	shieldLevel: number
+	price: { drone: number; shield: number }
 }
 
-const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, dronesLevel, levelUpShield, shieldLevel }: Props) => {
+const HUD = ({
+	settings,
+	onOffDrones,
+	onOffShield,
+	levelUpDrones,
+	dronesLevel,
+	levelUpShield,
+	shieldLevel,
+	price,
+}: Props) => {
 	const livesPercent = (settings.lives / 100) * 100
 	const shieldPercent = (settings.shield / 100) * 100
 
@@ -49,10 +59,12 @@ const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, dronesLevel, l
 					<img className={s.icon} src={ruble} alt="Рубли" />
 				</button> */}
 			</div>
+
 			<div className={s.rightBottomBlock}>
 				<div className={s.btnsWithLevelUp}>
 					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpDrones}>
 						<img className={s.icon} src={levelUp} alt="+Уровень" />
+						<span className={s.level}>{price.drone * 2 * dronesLevel || price.drone}</span>
 					</button>
 					<button
 						className={
@@ -69,6 +81,7 @@ const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, dronesLevel, l
 				<div className={s.btnsWithLevelUp}>
 					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpShield}>
 						<img className={s.icon} src={levelUp} alt="+Уровень" />
+						<span className={s.level}>{price.shield * 2 * shieldLevel || price.shield}</span>
 					</button>
 
 					<button
