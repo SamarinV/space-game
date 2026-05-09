@@ -16,14 +16,20 @@
 	top: 10px;
 	right: 10px;
 
+	transform: scale(1);
+	transition: transform 0.2s;
 }
 
-@keyframes fall {
-	from {
-		transform: translateY(0);
-	}
-
-	to {
-		transform: translateY(110vh);
-	}
+.hitbox:active .enemy {
+	transform: scale(1.4);
 }
+
+// @keyframes fall {
+// 	from {
+// 		transform: translateY(0);
+// 	}
+
+// 	to {
+// 		transform: translateY(110vh);
+// 	}
+// }

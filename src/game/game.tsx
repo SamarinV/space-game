@@ -6,6 +6,7 @@ import Spaceship from '../components/spaceShip/spaceShip'
 import Stars from '../components/stars/stars'
 import { moveEnemy } from '../components/enemy/moveEnemy'
 import { applyDamage } from '../components/enemy/applyDamage'
+import { toast } from 'react-toastify'
 
 export type EnemyType = {
 	id: number
@@ -14,13 +15,18 @@ export type EnemyType = {
 }
 
 export type SettingsType = {
-	withEnemy: boolean
+	withRuble: boolean
+	dronesLevel: number
 	withDrones: boolean
+	shieldLevel: number
 	withShield: boolean
 	score: number
 	shield: number
 	lives: number
 }
+
+//цена для покупки дронов и щита
+const price = { drone: 10, shield: 10 }
 
 const Game = () => {
 	const [enemy, setEnemy] = useState<EnemyType | null>(null)
@@ -29,8 +35,10 @@ const Game = () => {
 	//Settings
 	//состояние кнопок верхний правый край
 	const [settings, setSettings] = useState<SettingsType>({
-		withEnemy: false,
+		withRuble: true,
+		dronesLevel: 0,
 		withDrones: false,
+		shieldLevel: 0,
 		withShield: false,
 		score: 0,
 		shield: 80,
@@ -53,14 +61,13 @@ const Game = () => {
 		}
 	}, [settings.withDrones])
 
-
 	//зарядка щита
 	useEffect(() => {
 		if (!settings.withShield && settings.shield < 100) {
 			const interval = setInterval(() => {
 				setSettings((prev) => ({
 					...prev,
-					shield: ( prev.shield + 1),
+					shield: prev.shield + 1,
 				}))
 			}, 1000)
 
@@ -82,45 +89,51 @@ const Game = () => {
 		}
 	}, [settings.withShield, settings.shield])
 
-
-	// 🚀 SPAWN (только если врага нет)
+	// 🚀 SPAWN
 	useEffect(() => {
 		const interval = setInterval(() => {
-			if (settings.withEnemy) {
+			if (settings.withRuble) {
 				setEnemy((prev) => {
 					if (prev) return prev
 
 					return {
 						id: Date.now(),
-						x: 400 + Math.random() * (window.innerWidth - 400 * 2),
-						y: -80,
+						x: 100 + Math.random() * (window.innerWidth - 200 * 2),
+						y: -60,
 					}
 				})
 			}
 		}, 2000)
 
 		return () => clearInterval(interval)
-	}, [settings.withEnemy])
+	}, [settings.withRuble])
 
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setEnemy((prev) => {
 				if (!prev) return null
 
-				const { updated, hit } = moveEnemy(prev)
+				const { updated, missed } = moveEnemy(prev)
 
-				// 💥 враг ушёл вниз или попал
-				if (updated.y > window.innerHeight - 500 || hit) {
-					setShipHit(true)
+				// =========================
+				// 💥 ПОПАЛ В КОРАБЛЬ
+				// =========================
+				// if (hit) {
+				// 	setShipHit(true)
 
-					setTimeout(() => {
-						setShipHit(false)
-					}, 300)
+				// 	setTimeout(() => {
+				// 		setShipHit(false)
+				// 	}, 300)
 
-					const damage = 5
-					setSettings((prev) => applyDamage(prev, damage))
+				// 	setSettings((prev) => applyDamage(prev, 5))
 
-					// удалить врага
+				// 	return null
+				// }
+
+				// =========================
+				// 🚀 ПРОЛЕТЕЛ МИМО
+				// =========================
+				if (missed) {
 					return null
 				}
 
@@ -140,27 +153,70 @@ const Game = () => {
 		removeEnemy()
 	}
 
-	const onOffEnemy = () => {
-		if (settings.withEnemy) {
-			setSettings((prev) => ({ ...prev, withEnemy: false }))
-			setEnemy(null)
-		} else {
-			setSettings((prev) => ({ ...prev, withEnemy: true }))
+	// const onOffRuble = () => {
+	// 	if (settings.withRuble) {
+	// 		setSettings((prev) => ({ ...prev, withRuble: false }))
+	// 		setEnemy(null)
+	// 	} else {
+	// 		setSettings((prev) => ({ ...prev, withRuble: true }))
+	// 	}
+	// }
+
+	const levelUpDrones = () => {
+		const currentLevel = settings.dronesLevel
+		const cost = currentLevel === 0 ? price.drone : price.drone * currentLevel * 2
+		if (settings.score < cost) {
+			toast.error(`Нужно ${cost} ₽`)
+			return
 		}
+		toast.success(`Дроны улучшены! -${cost} ₽`)
+
+		setSettings((prev) => ({
+			...prev,
+			score: prev.score - cost,
+			dronesLevel: prev.dronesLevel + 1,
+		}))
 	}
 	const onOffDrones = () => {
-		if (settings.withDrones) {
-			setSettings((prev) => ({ ...prev, withDrones: false }))
-		} else {
-			setSettings((prev) => ({ ...prev, withDrones: true }))
+		if (settings.dronesLevel > 0) {
+			if (settings.withDrones) {
+				setSettings((prev) => ({ ...prev, withDrones: false }))
+			} else {
+				setSettings((prev) => ({ ...prev, withDrones: true }))
+			}
 		}
 	}
 
+	const levelUpShield = () => {
+		const currentLevel = settings.shieldLevel
+		const cost = currentLevel === 0 ? price.shield : price.shield * currentLevel * 2
+		if (settings.score < cost) {
+			toast.error(`Нужно ${cost} ₽`)
+			return
+		}
+		toast.success(`Щит улучшен! -${cost} ₽`)
+		setSettings((prev) => ({
+			...prev,
+			score: prev.score - cost,
+			shieldLevel: prev.shieldLevel + 1,
+		}))
+	}
+
 	const onOffShield = () => {
-		if (settings.withShield) {
-			setSettings((prev) => ({ ...prev, withShield: false }))
-		} else {
-			setSettings((prev) => ({ ...prev, withShield: true }))
+		// console.log(settings.shieldIsBuying)
+		// if (!settings.shieldIsBuying && settings.score >= price.shield) {
+		// 	toast.success(`Покупка щита! -${price.shield} рублей!`)
+		// 	setSettings((prev) => ({ ...prev, score: prev.score - price.shield, shieldIsBuying: true }))
+		// }
+		// if (!settings.shieldIsBuying && settings.score < price.drone) {
+		// 	toast.error(`Нужно ${price.shield} рублей!`)
+		// }
+		if (settings.shieldLevel > 0) {
+			if (settings.withShield) {
+				setSettings((prev) => ({ ...prev, withShield: false }))
+			} else {
+				setSettings((prev) => ({ ...prev, withShield: true }))
+			}
 		}
 	}
 
@@ -168,9 +224,22 @@ const Game = () => {
 		<>
 			<Stars />
 
-			<HUD onOffEnemy={onOffEnemy} onOffDrones={onOffDrones} onOffShield={onOffShield} settings={settings} />
+			<HUD
+				dronesLevel={settings.dronesLevel}
+				shieldLevel={settings.shieldLevel}
+				levelUpDrones={levelUpDrones}
+				levelUpShield={levelUpShield}
+				onOffDrones={onOffDrones}
+				onOffShield={onOffShield}
+				settings={settings}
+			/>
 
-			<Spaceship withDrones={settings.withDrones} withShield={settings.withShield} shieldIsHolding={shieldIsHolding} shipHit={shipHit} />
+			<Spaceship
+				withDrones={settings.withDrones}
+				withShield={settings.withShield}
+				shieldIsHolding={shieldIsHolding}
+				shipHit={shipHit}
+			/>
 
 			{enemy && <Enemy id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />}
 		</>

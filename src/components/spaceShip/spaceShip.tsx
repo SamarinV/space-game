@@ -55,7 +55,7 @@ const triggerHeal = () => {
 		<div className={`${s.container} ${shipHit ? s.hit : ''}`}>
 			{withShield && <div className={`${shieldIsHolding ? s.activeShield : s.shieldIsOver}	`}></div>}
 			<img src={ship} alt="spaceship" className={s.ship} />
-			{shipHit && <img src={explosion} alt="explosion" className={s.explosion} />}
+			{/* {shipHit && <img src={explosion} alt="explosion" className={s.explosion} />} */}
 
 			<div className={s.drones}>
 				<div className={`${s.drone} ${s.drone1} ${!droneActive[0] ? s.droneDisabled : ''}`}>
