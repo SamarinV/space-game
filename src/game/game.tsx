@@ -22,6 +22,7 @@ export type SettingsType = {
 	score: number
 	shield: number
 	lives: number
+	speed: number
 }
 
 //цена для покупки дронов и щита
@@ -38,6 +39,7 @@ const Game = () => {
 		score: 0,
 		shield: 80,
 		lives: 80,
+		speed: 1,
 	})
 
 	const shieldIsHolding = settings.withShield && settings.shield > 0
@@ -108,7 +110,7 @@ const Game = () => {
 			setEnemy((prev) => {
 				if (!prev) return null
 
-				const { updated, missed } = moveEnemy(prev)
+				const { updated, missed } = moveEnemy(prev, settings.speed)
 
 				// =========================
 				// 💥 ПОПАЛ В КОРАБЛЬ
@@ -137,7 +139,7 @@ const Game = () => {
 		}, 16)
 
 		return () => clearInterval(interval)
-	}, [])
+	}, [settings.speed])
 
 	const removeEnemy = () => {
 		setEnemy(null)
@@ -215,18 +217,24 @@ const Game = () => {
 		}
 	}
 
+	const changeSpeed = () => {
+		if (settings.speed === 20) {
+			setSettings((prev) => ({ ...prev, speed: 1 }))
+		}
+		setSettings((prev) => ({ ...prev, speed: prev.speed + 1 }))
+	}
+
 	return (
 		<>
 			<Stars />
 
 			<HUD
 				price={price}
-				dronesLevel={settings.dronesLevel}
-				shieldLevel={settings.shieldLevel}
 				levelUpDrones={levelUpDrones}
 				levelUpShield={levelUpShield}
 				onOffDrones={onOffDrones}
 				onOffShield={onOffShield}
+				changeSpeed={changeSpeed}
 				settings={settings}
 			/>
 

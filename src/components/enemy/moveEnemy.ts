@@ -2,12 +2,12 @@ import type { EnemyType } from '../../game/game'
 
 const ENEMY_SIZE = 50
 
-export const moveEnemy = (enemy: EnemyType) => {
-	const speed = 1
+export const moveEnemy = (enemy: EnemyType, speed: number) => {
+	const currentSpeed = speed
 
 	const updated = {
 		...enemy,
-		y: enemy.y + speed,
+		y: enemy.y + currentSpeed,
 	}
 
 	// центр enemy

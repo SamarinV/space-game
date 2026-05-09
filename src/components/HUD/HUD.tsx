@@ -13,26 +13,21 @@ type Props = {
 	onOffShield: () => void
 	levelUpDrones: () => void
 	levelUpShield: () => void
-	dronesLevel: number
-	shieldLevel: number
+	changeSpeed: () => void
 	price: { drone: number; shield: number }
 }
 
-const HUD = ({
-	settings,
-	onOffDrones,
-	onOffShield,
-	levelUpDrones,
-	dronesLevel,
-	levelUpShield,
-	shieldLevel,
-	price,
-}: Props) => {
+const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, levelUpShield, changeSpeed, price }: Props) => {
 	const livesPercent = (settings.lives / 100) * 100
 	const shieldPercent = (settings.shield / 100) * 100
 
 	return (
 		<>
+			<div className={s.topLeftBlock}>
+				<button className={s.btn} onClick={changeSpeed}>
+					<span className={s.level}>{settings.speed}</span>
+				</button>
+			</div>
 			<div className={s.hud}>
 				{/* HP */}
 				<div className={s.barBlock}>
@@ -64,7 +59,7 @@ const HUD = ({
 				<div className={s.btnsWithLevelUp}>
 					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpDrones}>
 						<img className={s.icon} src={levelUp} alt="+Уровень" />
-						<span className={s.level}>{price.drone * 2 * dronesLevel || price.drone}</span>
+						<span className={s.level}>{price.drone * 2 * settings.dronesLevel || price.drone}</span>
 					</button>
 					<button
 						className={
@@ -75,13 +70,13 @@ const HUD = ({
 						onClick={onOffDrones}
 					>
 						<img className={s.icon} src={drone} alt="Дроны" />
-						<span className={s.level}>{dronesLevel}</span>
+						<span className={s.level}>{settings.dronesLevel}</span>
 					</button>
 				</div>
 				<div className={s.btnsWithLevelUp}>
 					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpShield}>
 						<img className={s.icon} src={levelUp} alt="+Уровень" />
-						<span className={s.level}>{price.shield * 2 * shieldLevel || price.shield}</span>
+						<span className={s.level}>{price.shield * 2 * settings.shieldLevel || price.shield}</span>
 					</button>
 
 					<button
@@ -93,7 +88,7 @@ const HUD = ({
 						onClick={onOffShield}
 					>
 						<img className={s.icon} src={shield} alt="Щит" />
-						<span className={s.level}>{shieldLevel}</span>
+						<span className={s.level}>{settings.shieldLevel}</span>
 					</button>
 				</div>
 			</div>
