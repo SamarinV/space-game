@@ -14,10 +14,20 @@ type Props = {
 	levelUpDrones: () => void
 	levelUpShield: () => void
 	changeSpeed: () => void
+	playPaused: () => void
 	price: { drone: number; shield: number }
 }
 
-const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, levelUpShield, changeSpeed, price }: Props) => {
+const HUD = ({
+	settings,
+	onOffDrones,
+	onOffShield,
+	levelUpDrones,
+	levelUpShield,
+	changeSpeed,
+	price,
+	playPaused,
+}: Props) => {
 	const livesPercent = (settings.lives / 100) * 100
 	const shieldPercent = (settings.shield / 100) * 100
 
@@ -27,6 +37,9 @@ const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, levelUpShield,
 			<div className={s.topLeftBlock}>
 				<button className={s.btn} onClick={changeSpeed}>
 					<span className={s.level}>{settings.speed}</span>
+				</button>
+				<button className={s.btn} onClick={playPaused}>
+					<span className={s.level}>{settings.isPaused ? '▶' : '⏸'}</span>
 				</button>
 			</div>
 			<div className={s.hud}>
@@ -47,13 +60,10 @@ const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, levelUpShield,
 				</div>
 			</div>
 			<div className={s.rightTopBlock}>
-				<div className={s.score}>
-					{settings.score}
+				<div className={s.money}>
+					{settings.money}
 					<img className={s.icon} style={{ width: '24px', height: '24px' }} src={ruble} alt="Рубли" />
 				</div>
-				{/* <button className={s.btn + (!settings.withRuble ? ' ' + s.disabled : '')} onClick={onOffRuble}>
-					<img className={s.icon} src={ruble} alt="Рубли" />
-				</button> */}
 			</div>
 
 			<div className={s.rightBottomBlock}>
