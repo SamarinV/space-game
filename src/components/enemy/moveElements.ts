@@ -1,8 +1,8 @@
-import type { EnemyType } from '../../game/game'
+import type { SpawnElementsType } from '../../game/game'
 
-const ENEMY_SIZE = 50
+const ELEMENT_SIZE = 50
 
-export const moveEnemy = (enemy: EnemyType, speed: number) => {
+export const moveElements = (enemy: SpawnElementsType, speed: number) => {
 	const currentSpeed = speed
 
 	const updated = {
@@ -11,8 +11,8 @@ export const moveEnemy = (enemy: EnemyType, speed: number) => {
 	}
 
 	// центр enemy
-	const enemyCenterX = updated.x + ENEMY_SIZE / 2
-	const enemyCenterY = updated.y + ENEMY_SIZE / 2
+	const enemyCenterX = updated.x + ELEMENT_SIZE / 2
+	const enemyCenterY = updated.y + ELEMENT_SIZE / 2
 
 	// центр корабля
 	const shipX = window.innerWidth / 2
@@ -25,7 +25,7 @@ export const moveEnemy = (enemy: EnemyType, speed: number) => {
 	const hit = distance < 80
 
 	// улетел за экран
-	const missed = updated.y > window.innerHeight + ENEMY_SIZE
+	const missed = updated.y > window.innerHeight + ELEMENT_SIZE
 
 	return {
 		updated,

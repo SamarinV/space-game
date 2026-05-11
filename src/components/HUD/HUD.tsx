@@ -22,7 +22,8 @@ const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, levelUpShield,
 	const shieldPercent = (settings.shield / 100) * 100
 
 	return (
-		<>
+		<div className={s.wrapper}>
+			<div className={s.timer}>{settings.asteroidsTimer} сек</div>
 			<div className={s.topLeftBlock}>
 				<button className={s.btn} onClick={changeSpeed}>
 					<span className={s.level}>{settings.speed}</span>
@@ -92,7 +93,7 @@ const HUD = ({ settings, onOffDrones, onOffShield, levelUpDrones, levelUpShield,
 					</button>
 				</div>
 			</div>
-		</>
+		</div>
 	)
 }
 

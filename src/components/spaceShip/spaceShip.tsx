@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import drone from '../../assets/images/drone.png'
 import ship from '../../assets/images/ship.png'
+import explosion from '../../assets/images/explosion.png'
 import s from './spaceShip.module.scss'
 
 type Props = {
 	shieldIsHolding: boolean
 	withShield: boolean
 	withDrones: boolean
+	hit: boolean
 }
 
-const Spaceship = ({ shieldIsHolding, withShield, withDrones }: Props) => {
+const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit }: Props) => {
 	const [droneActive, setDroneActive] = useState([false, false, false, false])
 	const [healPulse, setHealPulse] = useState([false, false, false, false])
 
@@ -53,7 +55,7 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones }: Props) => {
 		<div className={s.container}>
 			{withShield && <div className={`${shieldIsHolding ? s.activeShield : s.shieldIsOver}	`}></div>}
 			<img src={ship} alt="spaceship" className={s.ship} />
-			{/* {shipHit && <img src={explosion} alt="explosion" className={s.explosion} />} */}
+			{hit && <img src={explosion} alt="explosion" className={s.explosion} />}
 
 			<div className={s.drones}>
 				<div className={`${s.drone} ${s.drone1} ${!droneActive[0] ? s.droneDisabled : ''}`}>

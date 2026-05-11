@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react'
 
 import { toast } from 'react-toastify'
-import Enemy from '../components/enemy/enemy'
-import { moveEnemy } from '../components/enemy/moveEnemy'
 import HUD from '../components/HUD/HUD'
 import Spaceship from '../components/spaceShip/spaceShip'
 import Stars from '../components/stars/stars'
+import { moveElements } from '../components/enemy/moveElements'
+import SpawnElement from '../components/enemy/spawnElement'
+import { applyDamage } from '../components/enemy/applyDamage'
 
-export type EnemyType = {
+export type SpawnElementsType = {
 	id: number
 	x: number
 	y: number
 }
 
 export type SettingsType = {
-	withRuble: boolean
 	dronesLevel: number
 	withDrones: boolean
 	shieldLevel: number
@@ -23,15 +23,18 @@ export type SettingsType = {
 	shield: number
 	lives: number
 	speed: number
+	asteroidsTimer: number
+	withAsteroids: boolean
 }
 
 //цена для покупки дронов и щита
 const price = { drone: 10, shield: 10 }
 
 const Game = () => {
-	const [enemy, setEnemy] = useState<EnemyType | null>(null)
+	const [ruble, setRuble] = useState<SpawnElementsType | null>(null)
+	const [enemy, setEnemy] = useState<SpawnElementsType | null>(null)
+	const [shipHit, setShipHit] = useState<boolean>(false)
 	const [settings, setSettings] = useState<SettingsType>({
-		withRuble: true,
 		dronesLevel: 0,
 		withDrones: false,
 		shieldLevel: 0,
@@ -40,6 +43,8 @@ const Game = () => {
 		shield: 80,
 		lives: 80,
 		speed: 1,
+		asteroidsTimer: 60,
+		withAsteroids: false,
 	})
 
 	const shieldIsHolding = settings.withShield && settings.shield > 0
@@ -50,13 +55,13 @@ const Game = () => {
 			const interval = setInterval(() => {
 				setSettings((prev) => ({
 					...prev,
-					lives: Math.min(100, prev.lives + 1),
+					lives: Math.min(100, prev.lives + 1 * settings.dronesLevel),
 				}))
 			}, 2000)
 
 			return () => clearInterval(interval)
 		}
-	}, [settings.withDrones])
+	}, [settings.withDrones, settings.dronesLevel])
 
 	//зарядка щита
 	useEffect(() => {
@@ -64,13 +69,13 @@ const Game = () => {
 			const interval = setInterval(() => {
 				setSettings((prev) => ({
 					...prev,
-					shield: prev.shield + 1,
+					shield: prev.shield + 1 * settings.shieldLevel,
 				}))
 			}, 1000)
 
 			return () => clearInterval(interval)
 		}
-	}, [settings.withShield, settings.shield])
+	}, [settings.withShield, settings.shield, settings.shieldLevel])
 
 	//расход щита когда включен каждые 5 секунд
 	useEffect(() => {
@@ -86,11 +91,69 @@ const Game = () => {
 		}
 	}, [settings.withShield, settings.shield])
 
-	// 🚀 SPAWN
+	//появление астероидов
 	useEffect(() => {
 		const interval = setInterval(() => {
-			if (settings.withRuble) {
-				setEnemy((prev) => {
+			setSettings((prev) => {
+				// =========================
+				// ⏳ ТАЙМЕР ИДЁТ
+				// =========================
+				if (prev.asteroidsTimer > 0) {
+					return {
+						...prev,
+						asteroidsTimer: prev.asteroidsTimer - 1,
+					}
+				}
+
+				// =========================
+				// ☄️ ВКЛЮЧИТЬ АСТЕРОИДЫ
+				// =========================
+				if (!prev.withAsteroids) {
+					// выключить через 10 сек
+					setTimeout(() => {
+						setSettings((p) => ({
+							...p,
+							withAsteroids: false,
+							asteroidsTimer: 60,
+						}))
+					}, 10000)
+
+					return {
+						...prev,
+						withAsteroids: true,
+					}
+				}
+
+				return prev
+			})
+		}, 1000)
+
+		return () => clearInterval(interval)
+	}, [])
+
+	useEffect(() => {
+		if (!settings.withAsteroids) return
+		const interval = setInterval(() => {
+			setShipHit(true)
+
+			setTimeout(() => {
+				setShipHit(false)
+			}, 300)
+
+			setSettings((prev) => applyDamage(prev, 5))
+		}, 2500)
+
+		return () => clearInterval(interval)
+	}, [settings.withAsteroids])
+
+	// 🚀 SPAWN
+	useEffect(() => {
+		if (settings.withAsteroids) return
+		const interval = setInterval(() => {
+			//spawn ruble
+			if (enemy || ruble) return
+			if (Math.random() < 0.7) {
+				setRuble((prev) => {
 					if (prev) return prev
 
 					return {
@@ -99,37 +162,60 @@ const Game = () => {
 						y: -60,
 					}
 				})
+			} else {
+				//spawn enemy
+				setEnemy((prev) => {
+					if (prev) return prev
+
+					return {
+						id: Date.now(),
+						x: window.innerWidth / 2 - 30,
+						y: -60,
+					}
+				})
 			}
 		}, 2000)
 
 		return () => clearInterval(interval)
-	}, [settings.withRuble])
+	}, [ruble, enemy, settings.withAsteroids])
 
 	useEffect(() => {
 		const interval = setInterval(() => {
+			// =========================
+			// 💰 RUBLE
+			// =========================
+			setRuble((prev) => {
+				if (!prev) return null
+
+				const { updated, missed } = moveElements(prev, settings.speed)
+
+				if (missed) {
+					return null
+				}
+
+				return updated
+			})
+
+			// =========================
+			// 👾 ENEMY
+			// =========================
 			setEnemy((prev) => {
 				if (!prev) return null
 
-				const { updated, missed } = moveEnemy(prev, settings.speed)
+				const { updated, missed, hit } = moveElements(prev, settings.speed)
 
-				// =========================
-				// 💥 ПОПАЛ В КОРАБЛЬ
-				// =========================
-				// if (hit) {
-				// 	setShipHit(true)
+				// 💥 попадание
+				if (hit) {
+					setShipHit(true)
 
-				// 	setTimeout(() => {
-				// 		setShipHit(false)
-				// 	}, 300)
+					setTimeout(() => {
+						setShipHit(false)
+					}, 300)
 
-				// 	setSettings((prev) => applyDamage(prev, 5))
+					setSettings((prev) => applyDamage(prev, 5))
 
-				// 	return null
-				// }
-
-				// =========================
-				// 🚀 ПРОЛЕТЕЛ МИМО
-				// =========================
+					return null
+				}
 				if (missed) {
 					return null
 				}
@@ -141,23 +227,19 @@ const Game = () => {
 		return () => clearInterval(interval)
 	}, [settings.speed])
 
-	const removeEnemy = () => {
-		setEnemy(null)
+	const removeElement = (element: 'enemy' | 'ruble') => {
+		if (element === 'enemy') setEnemy(null)
+		if (element === 'ruble') setRuble(null)
 	}
 
+	const handleRubleClick = () => {
+		setSettings((prev) => ({ ...prev, score: prev.score + 10 }))
+		removeElement('ruble')
+	}
 	const handleEnemyClick = () => {
 		setSettings((prev) => ({ ...prev, score: prev.score + 10 }))
-		removeEnemy()
+		removeElement('enemy')
 	}
-
-	// const onOffRuble = () => {
-	// 	if (settings.withRuble) {
-	// 		setSettings((prev) => ({ ...prev, withRuble: false }))
-	// 		setEnemy(null)
-	// 	} else {
-	// 		setSettings((prev) => ({ ...prev, withRuble: true }))
-	// 	}
-	// }
 
 	const levelUpDrones = () => {
 		const currentLevel = settings.dronesLevel
@@ -226,7 +308,7 @@ const Game = () => {
 
 	return (
 		<>
-			<Stars />
+			<Stars asteroids={settings.withAsteroids} />
 
 			<HUD
 				price={price}
@@ -238,9 +320,15 @@ const Game = () => {
 				settings={settings}
 			/>
 
-			<Spaceship withDrones={settings.withDrones} withShield={settings.withShield} shieldIsHolding={shieldIsHolding} />
+			<Spaceship
+				hit={shipHit}
+				withDrones={settings.withDrones}
+				withShield={settings.withShield}
+				shieldIsHolding={shieldIsHolding}
+			/>
 
-			{enemy && <Enemy id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />}
+			{ruble && <SpawnElement isEnemy={false} id={ruble.id} x={ruble.x} y={ruble.y} onClick={handleRubleClick} />}
+			{enemy && <SpawnElement isEnemy={true} id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />}
 		</>
 	)
 }
