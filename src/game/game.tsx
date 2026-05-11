@@ -47,7 +47,7 @@ const Game = () => {
 		score: 0,
 		money: 0,
 		shield: 80,
-		lives: 0,
+		lives: 80,
 		speed: 1,
 		asteroidsTimer: 60,
 		withAsteroids: false,
