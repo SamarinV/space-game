@@ -16,6 +16,7 @@ type Props = {
 	changeSpeed: () => void
 	playPaused: () => void
 	price: { drone: number; shield: number }
+	buttonsIsBlock: boolean
 }
 
 const HUD = ({
@@ -27,6 +28,7 @@ const HUD = ({
 	changeSpeed,
 	price,
 	playPaused,
+	buttonsIsBlock,
 }: Props) => {
 	const livesPercent = (settings.lives / 100) * 100
 	const shieldPercent = (settings.shield / 100) * 100
@@ -68,7 +70,7 @@ const HUD = ({
 
 			<div className={s.rightBottomBlock}>
 				<div className={s.btnsWithLevelUp}>
-					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpDrones}>
+					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpDrones} disabled={buttonsIsBlock}>
 						<img className={s.icon} src={levelUp} alt="+Уровень" />
 						<span className={s.level}>{price.drone * 2 * settings.dronesLevel || price.drone}</span>
 					</button>
@@ -85,7 +87,7 @@ const HUD = ({
 					</button>
 				</div>
 				<div className={s.btnsWithLevelUp}>
-					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpShield}>
+					<button className={s.btn + ' ' + s.levelUp} onClick={levelUpShield} disabled={buttonsIsBlock}>
 						<img className={s.icon} src={levelUp} alt="+Уровень" />
 						<span className={s.level}>{price.shield * 2 * settings.shieldLevel || price.shield}</span>
 					</button>

@@ -39,6 +39,7 @@ const Game = () => {
 	const [ruble, setRuble] = useState<SpawnElementsType | null>(null)
 	const [enemy, setEnemy] = useState<SpawnElementsType | null>(null)
 	const [shipHit, setShipHit] = useState<boolean>(false)
+	const [buttonsIsBlock, setButtonsIsBlock] = useState(false)
 	const [settings, setSettings] = useState<SettingsType>({
 		dronesLevel: 0,
 		withDrones: false,
@@ -88,10 +89,13 @@ const Game = () => {
 	}
 
 	const levelUpDrones = () => {
+		if (buttonsIsBlock) return
+		setButtonsIsBlock(true)
 		const currentLevel = settings.dronesLevel
 		const cost = currentLevel === 0 ? price.drone : price.drone * currentLevel * 2
 		if (settings.score < cost) {
 			toast.error(`Нужно ${cost} ₽`)
+			setButtonsIsBlock(false)
 			return
 		}
 		toast.success(`Дроны улучшены! -${cost} ₽`)
@@ -101,6 +105,7 @@ const Game = () => {
 			money: prev.money - cost,
 			dronesLevel: prev.dronesLevel + 1,
 		}))
+		setButtonsIsBlock(false)
 	}
 	const onOffDrones = () => {
 		if (settings.dronesLevel > 0) {
@@ -113,10 +118,13 @@ const Game = () => {
 	}
 
 	const levelUpShield = () => {
+		if(buttonsIsBlock) return
+		setButtonsIsBlock(true)
 		const currentLevel = settings.shieldLevel
 		const cost = currentLevel === 0 ? price.shield : price.shield * currentLevel * 2
 		if (settings.money < cost) {
 			toast.error(`Нужно ${cost} ₽`)
+			setButtonsIsBlock(false)
 			return
 		}
 		toast.success(`Щит улучшен! -${cost} ₽`)
@@ -125,6 +133,7 @@ const Game = () => {
 			money: prev.money - cost,
 			shieldLevel: prev.shieldLevel + 1,
 		}))
+		setButtonsIsBlock(false)
 	}
 
 	const onOffShield = () => {
@@ -175,6 +184,7 @@ const Game = () => {
 				changeSpeed={changeSpeed}
 				playPaused={playPausedHandler}
 				settings={settings}
+				buttonsIsBlock={buttonsIsBlock}
 			/>
 
 			<Spaceship
