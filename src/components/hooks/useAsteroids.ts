@@ -32,6 +32,7 @@ export const useAsteroids = ({ settings, setSettings, setShipHit }: PropsType) =
 							...p,
 							withAsteroids: false,
 							asteroidsTimer: 60,
+							asteroidsLevel: p.asteroidsLevel + 1,
 						}))
 					}, 10000)
 
@@ -62,8 +63,8 @@ export const useAsteroids = ({ settings, setSettings, setShipHit }: PropsType) =
 				setShipHit(false)
 			}, 300)
 
-			setSettings((prev) => applyDamage(prev, 5))
-		}, 2500)
+			setSettings((prev) => applyDamage(prev, 5 + prev.asteroidsLevel))
+		}, 500)
 
 		return () => clearInterval(interval)
 	}, [settings.withAsteroids, settings.isPaused, setSettings])

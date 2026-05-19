@@ -18,5 +18,5 @@ export const useDrones = ({settings, setSettings}: PropsType) => {
 		}, 2000)
 
 		return () => clearInterval(interval)
-	}, [settings.withDrones, settings.dronesLevel])
+	}, [settings.withDrones, settings.dronesLevel, settings.isPaused])
 }

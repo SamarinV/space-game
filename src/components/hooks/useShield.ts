@@ -1,11 +1,11 @@
-import { useEffect } from "react"
-import type { SettingsType } from "../../game/game"
+import { useEffect } from 'react'
+import type { SettingsType } from '../../game/game'
 
 type PropsType = {
 	settings: SettingsType
 	setSettings: React.Dispatch<React.SetStateAction<SettingsType>>
 }
-export const useShield = ({settings, setSettings}: PropsType) => {
+export const useShield = ({ settings, setSettings }: PropsType) => {
 	useEffect(() => {
 		if (settings.isPaused) return
 		if (!settings.withShield && settings.shield < 100) {
@@ -18,5 +18,5 @@ export const useShield = ({settings, setSettings}: PropsType) => {
 
 			return () => clearInterval(interval)
 		}
-	}, [settings.withShield, settings.shield, settings.shieldLevel])
+	}, [settings.withShield, settings.shield, settings.shieldLevel, settings.isPaused])
 }

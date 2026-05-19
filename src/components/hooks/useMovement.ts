@@ -47,7 +47,7 @@ export const useMovement = ({ settings, setSettings, setEnemy, setRuble, setShip
 						setShipHit(false)
 					}, 300)
 
-					setSettings((prev) => applyDamage(prev, 5))
+					setSettings((prev) => applyDamage(prev, 20))
 
 					return null
 				}

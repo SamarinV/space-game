@@ -28,6 +28,7 @@ export type SettingsType = {
 	lives: number
 	speed: number
 	asteroidsTimer: number
+	asteroidsLevel: number
 	withAsteroids: boolean
 	isPaused: boolean
 }
@@ -51,6 +52,7 @@ const Game = () => {
 		lives: 80,
 		speed: 1,
 		asteroidsTimer: 60,
+		asteroidsLevel: 0,
 		withAsteroids: false,
 		isPaused: false,
 	})
@@ -62,14 +64,15 @@ const Game = () => {
 
 	const shieldIsHolding = settings.withShield && settings.shield > 0
 
-	//состояние во время паузы
-	useEffect(() => {
-		console.log(settings.isPaused)
-	}, [settings.isPaused])
-
 	const playPausedHandler = () => {
 		setSettings((prev) => ({ ...prev, isPaused: !prev.isPaused }))
 	}
+	// //состояние во время паузы
+	// useEffect(() => {
+	// 	if (settings.lives === 0) {
+	// 		playPausedHandler()
+	// 	}
+	// }, [settings.lives])
 
 	const removeElement = (element: 'enemy' | 'ruble') => {
 		if (element === 'enemy') setEnemy(null)
@@ -118,7 +121,7 @@ const Game = () => {
 	}
 
 	const levelUpShield = () => {
-		if(buttonsIsBlock) return
+		if (buttonsIsBlock) return
 		setButtonsIsBlock(true)
 		const currentLevel = settings.shieldLevel
 		const cost = currentLevel === 0 ? price.shield : price.shield * currentLevel * 2
