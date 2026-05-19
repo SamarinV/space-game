@@ -31,6 +31,7 @@ export type SettingsType = {
 	asteroidsLevel: number
 	withAsteroids: boolean
 	isPaused: boolean
+	isStartedGame: boolean
 }
 
 //цена для покупки дронов и щита
@@ -54,7 +55,8 @@ const Game = () => {
 		asteroidsTimer: 60,
 		asteroidsLevel: 1,
 		withAsteroids: false,
-		isPaused: false,
+		isPaused: true,
+		isStartedGame: false,
 	})
 	useDrones({ settings, setSettings })
 	useShield({ settings, setSettings })
@@ -165,8 +167,11 @@ const Game = () => {
 			asteroidsTimer: 60,
 			withAsteroids: false,
 			isPaused: false,
+			isStartedGame: false,
 		}))
 	}
+
+	const startGame = () => setSettings((prev) => ({ ...prev, isStartedGame: true, isPaused: false }))
 
 	return (
 		<>
@@ -190,23 +195,31 @@ const Game = () => {
 				withShield={settings.withShield}
 				shieldIsHolding={shieldIsHolding}
 				shieldLevel={settings.shieldLevel}
+				dronesLevel={settings.dronesLevel}
 			/>
 
 			{ruble && <SpawnElement isEnemy={false} id={ruble.id} x={ruble.x} y={ruble.y} onClick={handleRubleClick} />}
 			{enemy && <SpawnElement isEnemy={true} id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />}
-			{settings.isPaused && (
+			{settings.isPaused && settings.isStartedGame && (
 				<div className={s.paused}>
 					{' '}
 					<span>-- ПАУЗА -- </span>
 					<span>Ваш счет: {settings.score}</span>
 				</div>
 			)}
-			{settings.lives === 0 && (
+			{settings.lives === 0 && settings.isStartedGame && (
 				<div className={s.paused}>
 					<span>-- ИГРА ОКОНЧЕНА -- </span>
 					<span>Ваш счет: {settings.score}</span>
 					<button className={s.btn} onClick={restartGame}>
 						Начать заново
+					</button>
+				</div>
+			)}
+			{!settings.isStartedGame && (
+				<div className={s.paused}>
+					<button className={s.btn} onClick={startGame}>
+						НАЧАТЬ ИГРУ
 					</button>
 				</div>
 			)}

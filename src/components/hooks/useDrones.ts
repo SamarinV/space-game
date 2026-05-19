@@ -7,16 +7,16 @@ type PropsType = {
 }
 export const useDrones = ({settings, setSettings}: PropsType) => {
 	useEffect(() => {
-		if (settings.isPaused) return
+		if (settings.isPaused || !settings.isStartedGame) return
 		if (!settings.withDrones) return
 
 		const interval = setInterval(() => {
 			setSettings((prev) => ({
 				...prev,
-				lives: Math.min(100, prev.lives + settings.dronesLevel),
+				lives: Math.min(100, prev.lives + settings.dronesLevel*4),
 			}))
 		}, 2000)
 
 		return () => clearInterval(interval)
-	}, [settings.withDrones, settings.dronesLevel, settings.isPaused])
+	}, [settings.withDrones, settings.dronesLevel, settings.isPaused, settings.isStartedGame])
 }

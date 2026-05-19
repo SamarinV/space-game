@@ -11,17 +11,26 @@ type Props = {
 	withDrones: boolean
 	hit: boolean
 	shieldLevel: number
+	dronesLevel: number
 }
 
-const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel }: Props) => {
+const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel, dronesLevel }: Props) => {
 	const [droneActive, setDroneActive] = useState([false, false, false, false])
 	const [healPulse, setHealPulse] = useState([false, false, false, false])
+	const [shieldPulse, setShieldPulse] = useState(false)
 
 	const triggerHeal = () => {
 		setHealPulse([true, true, true, true])
 
 		setTimeout(() => {
 			setHealPulse([false, false, false, false])
+		}, 500)
+	}
+	const triggerShield = () => {
+		setShieldPulse(true)
+
+		setTimeout(() => {
+			setShieldPulse(false)
 		}, 500)
 	}
 	const sequence = (on: boolean, delay = 300) => {
@@ -43,6 +52,15 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel }
 	}, [withDrones])
 
 	useEffect(() => {
+		if (withShield) return
+		const interval = setInterval(() => {
+			triggerShield()
+		}, 2000)
+
+		return () => clearInterval(interval)
+	}, [withShield])
+
+	useEffect(() => {
 		let timers: ReturnType<typeof setTimeout>[] = []
 		if (withDrones) {
 			timers = sequence(true, 300)
@@ -58,7 +76,12 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel }
 			{withShield ? (
 				<div className={`${shieldIsHolding ? s.activeShield : s.shieldIsOver}	`}></div>
 			) : (
-				shieldLevel > 0 && <img src={renewableEnergy} alt="renewableEnergy" className={s.renewableEnergy}></img>
+				shieldLevel > 0 && (
+					<div className={s.renewableEnergy}>
+						<img src={renewableEnergy} alt="renewableEnergy"></img>{' '}
+						{shieldPulse && <div className={s.shield}>+{shieldLevel}</div>}
+					</div>
+				)
 			)}
 			<img src={ship} alt="spaceship" className={s.ship} />
 			{hit && <img src={explosion} alt="explosion" className={s.explosion} />}
@@ -66,22 +89,22 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel }
 			<div className={s.drones}>
 				<div className={`${s.drone} ${s.drone1} ${!droneActive[0] ? s.droneDisabled : ''}`}>
 					<img className={s.droneIcon} src={drone} alt="drone" />
-					{healPulse[0] && <div className={s.heal}>+</div>}
+					{healPulse[0] && <div className={s.heal}>+{dronesLevel}</div>}
 				</div>
 
 				<div className={`${s.drone} ${s.drone2} ${!droneActive[1] ? s.droneDisabled : ''}`}>
 					<img className={s.droneIcon} src={drone} alt="drone" />
-					{healPulse[1] && <div className={s.heal}>+</div>}
+					{healPulse[1] && <div className={s.heal}>+{dronesLevel}</div>}
 				</div>
 
 				<div className={`${s.drone} ${s.drone3} ${!droneActive[2] ? s.droneDisabled : ''}`}>
 					<img className={s.droneIcon} src={drone} alt="drone" />
-					{healPulse[2] && <div className={s.heal}>+</div>}
+					{healPulse[2] && <div className={s.heal}>+{dronesLevel}</div>}
 				</div>
 
 				<div className={`${s.drone} ${s.drone4} ${!droneActive[3] ? s.droneDisabled : ''}`}>
 					<img className={s.droneIcon} src={drone} alt="drone" />
-					{healPulse[3] && <div className={s.heal}>+</div>}
+					{healPulse[3] && <div className={s.heal}>+{dronesLevel}</div>}
 				</div>
 			</div>
 		</div>

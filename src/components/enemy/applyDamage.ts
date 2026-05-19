@@ -5,9 +5,10 @@ export const applyDamage = (
 	damage: number
 ): SettingsType => {
 	if (settings.withShield && settings.shield > 0) {
+		const currentDamage = damage - damage * settings.shieldLevel / 10
 		return {
 			...settings,
-			shield: Math.max(0, settings.shield - damage / 2 / settings.shieldLevel),
+			shield: Math.max(0, settings.shield - currentDamage),
 		}
 	}
 

@@ -10,7 +10,7 @@ type PropsType = {
 }
 export const useSpawn = ({settings, enemy, ruble, setEnemy, setRuble}: PropsType) => {
 useEffect(() => {
-	if (settings.isPaused) return
+	if (settings.isPaused || !settings.isStartedGame) return
 	if (settings.withAsteroids) return
 	const interval = setInterval(() => {
 		//spawn ruble
@@ -40,7 +40,7 @@ useEffect(() => {
 	}, 2000)
 
 	return () => clearInterval(interval)
-}, [ruble, enemy, settings.withAsteroids])
+}, [ruble, enemy, settings.withAsteroids, settings.isStartedGame, settings.isPaused])
 
 
 }

@@ -35,7 +35,9 @@ const HUD = ({
 
 	return (
 		<div className={s.wrapper}>
-			<div className={s.timer}>{settings.asteroidsTimer > 0 ? settings.asteroidsTimer + ' сек' : 'АСТЕРОИДЫ ур. ' + settings.asteroidsLevel}</div>
+			<div className={s.timer}>
+				{settings.asteroidsTimer > 0 ? settings.asteroidsTimer + ' сек' : 'АСТЕРОИДЫ ур. ' + settings.asteroidsLevel}
+			</div>
 			<div className={s.topLeftBlock}>
 				<button className={s.btn} onClick={changeSpeed}>
 					<span className={s.level}>{settings.speed}</span>
@@ -45,9 +47,10 @@ const HUD = ({
 				</button>
 			</div>
 			<div className={s.hud}>
+				
 				{/* HP */}
 				<div className={s.barBlock}>
-					<div className={s.label}>❤️ Жизни: {settings.lives}%</div>
+					<div className={s.label}>❤️ Жизни: {settings.lives.toFixed(0)}%</div>
 					<div className={s.bar}>
 						<div className={s.fillHp} style={{ width: `${livesPercent}%` }} />
 					</div>
@@ -55,7 +58,7 @@ const HUD = ({
 
 				{/* Shield */}
 				<div className={s.barBlock}>
-					<div className={s.label}>🛡 Щит: {settings.shield}%</div>
+					<div className={s.label}>🛡 Щит: {settings.shield.toFixed(0)}%</div>
 					<div className={s.bar}>
 						<div className={s.fillShield} style={{ width: `${shieldPercent}%` }} />
 					</div>
