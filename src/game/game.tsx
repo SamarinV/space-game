@@ -49,7 +49,7 @@ const Game = () => {
 		withShield: false,
 		score: 0,
 		money: 0,
-		shield: 80,
+		shield: 0,
 		lives: 80,
 		speed: 1,
 		asteroidsTimer: 60,
@@ -198,8 +198,12 @@ const Game = () => {
 				dronesLevel={settings.dronesLevel}
 			/>
 
-			{ruble && <SpawnElement isEnemy={false} id={ruble.id} x={ruble.x} y={ruble.y} onClick={handleRubleClick} />}
-			{enemy && <SpawnElement isEnemy={true} id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />}
+			{!settings.withAsteroids && ruble && (
+				<SpawnElement isEnemy={false} id={ruble.id} x={ruble.x} y={ruble.y} onClick={handleRubleClick} />
+			)}
+			{!settings.withAsteroids && enemy && (
+				<SpawnElement isEnemy={true} id={enemy.id} x={enemy.x} y={enemy.y} onClick={handleEnemyClick} />
+			)}
 			{settings.isPaused && settings.isStartedGame && (
 				<div className={s.paused}>
 					{' '}
