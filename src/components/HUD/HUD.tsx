@@ -35,7 +35,7 @@ const HUD = ({
 
 	return (
 		<div className={s.wrapper}>
-			<div className={s.timer}>{settings.asteroidsTimer > 0 ? settings.asteroidsTimer + ' сек' : 'АСТЕРОИДЫ'}</div>
+			<div className={s.timer}>{settings.asteroidsTimer > 0 ? settings.asteroidsTimer + ' сек' : 'АСТЕРОИДЫ ур. ' + settings.asteroidsLevel}</div>
 			<div className={s.topLeftBlock}>
 				<button className={s.btn} onClick={changeSpeed}>
 					<span className={s.level}>{settings.speed}</span>

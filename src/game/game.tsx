@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'react-toastify'
 import SpawnElement from '../components/enemy/spawnElement'
 import { useAsteroids } from '../components/hooks/useAsteroids'
@@ -52,7 +52,7 @@ const Game = () => {
 		lives: 80,
 		speed: 1,
 		asteroidsTimer: 60,
-		asteroidsLevel: 0,
+		asteroidsLevel: 1,
 		withAsteroids: false,
 		isPaused: false,
 	})
@@ -67,12 +67,6 @@ const Game = () => {
 	const playPausedHandler = () => {
 		setSettings((prev) => ({ ...prev, isPaused: !prev.isPaused }))
 	}
-	// //состояние во время паузы
-	// useEffect(() => {
-	// 	if (settings.lives === 0) {
-	// 		playPausedHandler()
-	// 	}
-	// }, [settings.lives])
 
 	const removeElement = (element: 'enemy' | 'ruble') => {
 		if (element === 'enemy') setEnemy(null)
@@ -95,8 +89,8 @@ const Game = () => {
 		if (buttonsIsBlock) return
 		setButtonsIsBlock(true)
 		const currentLevel = settings.dronesLevel
-		const cost = currentLevel === 0 ? price.drone : price.drone * currentLevel * 2
-		if (settings.score < cost) {
+		const cost = currentLevel === 0 ? price.shield : price.shield * currentLevel * 2
+		if (settings.money < cost) {
 			toast.error(`Нужно ${cost} ₽`)
 			setButtonsIsBlock(false)
 			return
@@ -195,6 +189,7 @@ const Game = () => {
 				withDrones={settings.withDrones}
 				withShield={settings.withShield}
 				shieldIsHolding={shieldIsHolding}
+				shieldLevel={settings.shieldLevel}
 			/>
 
 			{ruble && <SpawnElement isEnemy={false} id={ruble.id} x={ruble.x} y={ruble.y} onClick={handleRubleClick} />}

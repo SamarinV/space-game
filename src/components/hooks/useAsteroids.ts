@@ -27,6 +27,10 @@ export const useAsteroids = ({ settings, setSettings, setShipHit }: PropsType) =
 
 				// start asteroids
 				if (!prev.withAsteroids) {
+					setSettings((p) => ({
+						...p,
+						withDrones: false,
+					}))
 					setTimeout(() => {
 						setSettings((p) => ({
 							...p,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import drone from '../../assets/images/drone.png'
 import ship from '../../assets/images/ship.png'
 import explosion from '../../assets/images/explosion.png'
+import renewableEnergy from '../../assets/images/renewableEnergy.png'
 import s from './spaceShip.module.scss'
 
 type Props = {
@@ -9,9 +10,10 @@ type Props = {
 	withShield: boolean
 	withDrones: boolean
 	hit: boolean
+	shieldLevel: number
 }
 
-const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit }: Props) => {
+const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel }: Props) => {
 	const [droneActive, setDroneActive] = useState([false, false, false, false])
 	const [healPulse, setHealPulse] = useState([false, false, false, false])
 
@@ -53,7 +55,11 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit }: Props) => {
 
 	return (
 		<div className={s.container}>
-			{withShield && <div className={`${shieldIsHolding ? s.activeShield : s.shieldIsOver}	`}></div>}
+			{withShield ? (
+				<div className={`${shieldIsHolding ? s.activeShield : s.shieldIsOver}	`}></div>
+			) : (
+				shieldLevel > 0 && <img src={renewableEnergy} alt="renewableEnergy" className={s.renewableEnergy}></img>
+			)}
 			<img src={ship} alt="spaceship" className={s.ship} />
 			{hit && <img src={explosion} alt="explosion" className={s.explosion} />}
 

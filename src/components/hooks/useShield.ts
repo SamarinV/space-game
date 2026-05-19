@@ -12,7 +12,7 @@ export const useShield = ({ settings, setSettings }: PropsType) => {
 			const interval = setInterval(() => {
 				setSettings((prev) => ({
 					...prev,
-					shield: prev.shield + 1 * settings.shieldLevel,
+					shield: Math.min(100, prev.shield + 1 * settings.shieldLevel),
 				}))
 			}, 1000)
 
