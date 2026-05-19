@@ -13,9 +13,9 @@ export const useDrones = ({settings, setSettings}: PropsType) => {
 		const interval = setInterval(() => {
 			setSettings((prev) => ({
 				...prev,
-				lives: Math.min(100, prev.lives + settings.dronesLevel*4),
+				lives: Math.min(prev.livesMax, prev.lives + settings.dronesLevel*4),
 			}))
-		}, 5000)
+		}, 6000)
 
 		return () => clearInterval(interval)
 	}, [settings.withDrones, settings.dronesLevel, settings.isPaused, settings.isStartedGame])

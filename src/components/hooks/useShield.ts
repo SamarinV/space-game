@@ -8,15 +8,15 @@ type PropsType = {
 export const useShield = ({ settings, setSettings }: PropsType) => {
 	useEffect(() => {
 		if (settings.isPaused) return
-		if (!settings.withShield && settings.shield < 100) {
+		if (!settings.withShield && settings.shield < settings.shieldMax) {
 			const interval = setInterval(() => {
 				setSettings((prev) => ({
 					...prev,
-					shield: Math.min(100, prev.shield + 1 * settings.shieldLevel),
+					shield: Math.min(prev.shieldMax, prev.shield + 1 * settings.shieldLevel),
 				}))
 			}, 1000)
 
 			return () => clearInterval(interval)
 		}
-	}, [settings.withShield, settings.shield, settings.shieldLevel, settings.isPaused])
+	}, [settings.withShield, settings.shield, settings.shieldLevel, settings.isPaused, settings.shieldMax])
 }

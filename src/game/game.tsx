@@ -25,7 +25,9 @@ export type SettingsType = {
 	score: number
 	money: number
 	shield: number
+	shieldMax: number
 	lives: number
+	livesMax: number
 	speed: number
 	asteroidsTimer: number
 	asteroidsLevel: number
@@ -50,9 +52,11 @@ const Game = () => {
 		score: 0,
 		money: 0,
 		shield: 0,
+		shieldMax: 100,
 		lives: 80,
+		livesMax: 100,
 		speed: 1,
-		asteroidsTimer: 60,
+		asteroidsTimer: 40,
 		asteroidsLevel: 1,
 		withAsteroids: false,
 		isPaused: true,
@@ -103,6 +107,7 @@ const Game = () => {
 			...prev,
 			money: prev.money - cost,
 			dronesLevel: prev.dronesLevel + 1,
+			livesMax: prev.livesMax + 10,
 		}))
 		setButtonsIsBlock(false)
 	}
@@ -131,6 +136,7 @@ const Game = () => {
 			...prev,
 			money: prev.money - cost,
 			shieldLevel: prev.shieldLevel + 1,
+			shieldMax: prev.shieldMax + 10,
 		}))
 		setButtonsIsBlock(false)
 	}
@@ -146,7 +152,7 @@ const Game = () => {
 	}
 
 	const changeSpeed = () => {
-		if (settings.speed === 20) {
+		if (settings.speed === 5) {
 			setSettings((prev) => ({ ...prev, speed: 1 }))
 		}
 		setSettings((prev) => ({ ...prev, speed: prev.speed + 1 }))
@@ -161,10 +167,12 @@ const Game = () => {
 			withShield: false,
 			score: 0,
 			money: 0,
-			shield: 80,
+			shield: 0,
+			shieldMax: 100,
 			lives: 80,
+			livesMax: 100,
 			speed: 1,
-			asteroidsTimer: 60,
+			asteroidsTimer: 40,
 			withAsteroids: false,
 			isPaused: false,
 			isStartedGame: false,

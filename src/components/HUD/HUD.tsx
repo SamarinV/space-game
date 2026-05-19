@@ -30,8 +30,8 @@ const HUD = ({
 	playPaused,
 	buttonsIsBlock,
 }: Props) => {
-	const livesPercent = (settings.lives / 100) * 100
-	const shieldPercent = (settings.shield / 100) * 100
+	const livesPercent = (settings.lives / settings.livesMax) * 100
+	const shieldPercent = (settings.shield / settings.shieldMax) * 100
 
 	return (
 		<div className={s.wrapper}>
@@ -47,7 +47,7 @@ const HUD = ({
 				</button>
 			</div>
 			<div className={s.hud}>
-				
+
 				{/* HP */}
 				<div className={s.barBlock}>
 					<div className={s.label}>❤️ Жизни: {settings.lives.toFixed(0)}%</div>
