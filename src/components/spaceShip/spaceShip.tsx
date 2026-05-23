@@ -18,8 +18,8 @@ type Props = {
 
 const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel, dronesLevel, onShoot }: Props) => {
 	const [droneActive, setDroneActive] = useState([false, false, false, false])
-	const [healPulse, setHealPulse] = useState([false, false, false, false])
 	const [shieldPulse, setShieldPulse] = useState(false)
+	const [healPulse, setHealPulse] = useState([false, false, false, false])
 
 	const triggerHeal = () => {
 		setHealPulse([true, true, true, true])
