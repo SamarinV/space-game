@@ -1,30 +1,41 @@
 import { useEffect, useRef } from 'react'
-import bgMusic from '../../assets/sounds/space.mp3'
+import bgMusicFile from '../../assets/sounds/space.mp3'
 
 export const useBackgroundMusic = () => {
 	const audioRef = useRef<HTMLAudioElement | null>(null)
 
 	useEffect(() => {
-		audioRef.current = new Audio(bgMusic)
+		const audio = new Audio(bgMusicFile)
 
-		audioRef.current.loop = true
-		audioRef.current.volume = 0.2
+		audio.loop = true
+		audio.volume = 0.2
+		audio.preload = 'auto'
 
-		const startMusic = () => {
-			audioRef.current?.play().catch(() => {})
+		audioRef.current = audio
 
-			window.removeEventListener('click', startMusic)
-			window.removeEventListener('touchstart', startMusic)
+		const startMusic = async () => {
+			try {
+				await audio.load()
+				await audio.play()
+
+				window.removeEventListener('touchstart', startMusic)
+				window.removeEventListener('pointerdown', startMusic)
+				window.removeEventListener('click', startMusic)
+			} catch (e) {
+				console.log('music blocked', e)
+			}
 		}
 
+		window.addEventListener('touchstart', startMusic, { passive: true })
+		window.addEventListener('pointerdown', startMusic)
 		window.addEventListener('click', startMusic)
-		window.addEventListener('touchstart', startMusic)
 
 		return () => {
-			audioRef.current?.pause()
+			audio.pause()
 
-			window.removeEventListener('click', startMusic)
 			window.removeEventListener('touchstart', startMusic)
+			window.removeEventListener('pointerdown', startMusic)
+			window.removeEventListener('click', startMusic)
 		}
 	}, [])
 }
