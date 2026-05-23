@@ -10,10 +10,21 @@ export const useBackgroundMusic = () => {
 		audioRef.current.loop = true
 		audioRef.current.volume = 0.2
 
-		audioRef.current.play().catch(() => {})
+		const startMusic = () => {
+			audioRef.current?.play().catch(() => {})
+
+			window.removeEventListener('click', startMusic)
+			window.removeEventListener('touchstart', startMusic)
+		}
+
+		window.addEventListener('click', startMusic)
+		window.addEventListener('touchstart', startMusic)
 
 		return () => {
 			audioRef.current?.pause()
+
+			window.removeEventListener('click', startMusic)
+			window.removeEventListener('touchstart', startMusic)
 		}
 	}, [])
 }
