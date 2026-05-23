@@ -94,12 +94,7 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel, 
 				src={ship}
 				alt="spaceship"
 				className={s.ship}
-				onClick={(e) => {
-					const rect = e.currentTarget.getBoundingClientRect()
-
-					onShoot(rect.left + rect.width / 2 - 10, rect.top)
-				}}
-				onTouchStart={(e) => {
+				onPointerDown={(e) => {
 					const rect = e.currentTarget.getBoundingClientRect()
 
 					onShoot(rect.left + rect.width / 2 - 10, rect.top)
