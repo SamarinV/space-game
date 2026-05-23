@@ -13,7 +13,6 @@ type Props = {
 	onOffShield: () => void
 	levelUpDrones: () => void
 	levelUpShield: () => void
-	changeSpeed: () => void
 	playPaused: () => void
 	price: { drone: number; shield: number }
 	buttonsIsBlock: boolean
@@ -25,7 +24,6 @@ const HUD = ({
 	onOffShield,
 	levelUpDrones,
 	levelUpShield,
-	changeSpeed,
 	price,
 	playPaused,
 	buttonsIsBlock,
@@ -39,9 +37,9 @@ const HUD = ({
 				{settings.asteroidsTimer > 0 ? settings.asteroidsTimer + ' сек' : 'АСТЕРОИДЫ ур. ' + settings.asteroidsLevel}
 			</div>
 			<div className={s.topLeftBlock}>
-				<button className={s.btn} onClick={changeSpeed}>
+				{/* <button className={s.btn} onClick={changeSpeed}>
 					<span className={s.level}>{settings.speed}</span>
-				</button>
+				</button> */}
 				<button className={s.btn} onClick={playPaused}>
 					<span className={s.level}>{settings.isPaused ? '▶' : '⏸'}</span>
 				</button>

@@ -4,6 +4,7 @@ import ship from '../../assets/images/ship.png'
 import explosion from '../../assets/images/explosion.png'
 import renewableEnergy from '../../assets/images/renewableEnergy.png'
 import s from './spaceShip.module.scss'
+import { playSound } from '../sound/soundManager'
 
 type Props = {
 	shieldIsHolding: boolean
@@ -70,6 +71,11 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel, 
 
 		return () => timers.forEach(clearTimeout)
 	}, [withDrones])
+
+	useEffect(() => {
+		if (!hit) return
+		playSound('hit')
+	}, [hit])
 
 	return (
 		<div className={s.container}>

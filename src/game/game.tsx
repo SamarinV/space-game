@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import SpawnElement from '../components/enemy/spawnElement'
 import { useAsteroids } from '../components/hooks/useAsteroids'
+import { useBackgroundMusic } from '../components/hooks/useBackgroundMusic'
 import { useDrones } from '../components/hooks/useDrones'
 import { useMovement } from '../components/hooks/useMovement'
 import { useShield } from '../components/hooks/useShield'
 import { useSpawn } from '../components/hooks/useSpawn'
 import HUD from '../components/HUD/HUD'
+import { playSound } from '../components/sound/soundManager'
 import Spaceship from '../components/spaceShip/spaceShip'
 import Stars from '../components/stars/stars'
 import s from './game.module.scss'
@@ -55,7 +57,7 @@ const Game = () => {
 		shieldMax: 100,
 		lives: 80,
 		livesMax: 100,
-		speed: 1,
+		speed: 2,
 		asteroidsTimer: 40,
 		asteroidsLevel: 1,
 		withAsteroids: false,
@@ -67,6 +69,7 @@ const Game = () => {
 	useAsteroids({ setSettings, settings, setShipHit })
 	useSpawn({ settings, enemy, ruble, setEnemy, setRuble })
 	useMovement({ settings, setSettings, setEnemy, setRuble, setShipHit })
+	useBackgroundMusic()
 
 	const shieldIsHolding = settings.withShield && settings.shield > 0
 
@@ -80,6 +83,7 @@ const Game = () => {
 	}
 
 	const handleRubleClick = () => {
+		playSound('coin')
 		setSettings((prev) => ({ ...prev, money: prev.money + 10 }))
 		setSettings((prev) => ({ ...prev, score: prev.score + 10 }))
 
@@ -101,6 +105,7 @@ const Game = () => {
 			setButtonsIsBlock(false)
 			return
 		}
+		playSound('levelUp')
 		toast.success(`Дроны улучшены! -${cost} ₽`)
 
 		setSettings((prev) => ({
@@ -131,6 +136,7 @@ const Game = () => {
 			setButtonsIsBlock(false)
 			return
 		}
+		playSound('levelUp')
 		toast.success(`Щит улучшен! -${cost} ₽`)
 		setSettings((prev) => ({
 			...prev,
@@ -151,13 +157,6 @@ const Game = () => {
 		}
 	}
 
-	const changeSpeed = () => {
-		if (settings.speed === 5) {
-			setSettings((prev) => ({ ...prev, speed: 1 }))
-		}
-		setSettings((prev) => ({ ...prev, speed: prev.speed + 1 }))
-	}
-
 	const restartGame = () => {
 		setSettings((prev) => ({
 			...prev,
@@ -171,7 +170,7 @@ const Game = () => {
 			shieldMax: 100,
 			lives: 80,
 			livesMax: 100,
-			speed: 1,
+			speed: 2,
 			asteroidsTimer: 40,
 			withAsteroids: false,
 			isPaused: false,
@@ -191,7 +190,6 @@ const Game = () => {
 				levelUpShield={levelUpShield}
 				onOffDrones={onOffDrones}
 				onOffShield={onOffShield}
-				changeSpeed={changeSpeed}
 				playPaused={playPausedHandler}
 				settings={settings}
 				buttonsIsBlock={buttonsIsBlock}
