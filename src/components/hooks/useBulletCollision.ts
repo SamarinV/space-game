@@ -28,7 +28,8 @@ export const useBulletCollision = ({ bullets, setBullets, enemy, setEnemy, setSe
 		// 💰 очки
 		setSettings((prev) => ({
 			...prev,
-			score: prev.score + 10,
+			score: prev.score + 20,
+			money: prev.money + 20,
 		}))
 
 		// 🚀 удалить пулю
