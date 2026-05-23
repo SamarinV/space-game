@@ -1,19 +1,24 @@
 import hitSound from '../../assets/sounds/boom.mp3'
 import coinSound from '../../assets/sounds/coin.mp3'
 import levelUpSound from '../../assets/sounds/levelUp.mp3'
+import asteroidsSound from '../../assets/sounds/asteroids.mp3'
+import bulletSound from '../../assets/sounds/bullet.mp3'
 
-type SoundName = 'hit' | 'coin' | 'levelUp'
+type SoundName = 'hit' | 'coin' | 'levelUp' | 'asteroids' | 'bullet'
 
 const sounds: Record<SoundName, HTMLAudioElement> = {
 	hit: new Audio(hitSound),
 	coin: new Audio(coinSound),
 	levelUp: new Audio(levelUpSound),
+	asteroids: new Audio(asteroidsSound),
+	bullet: new Audio(bulletSound),
 }
 
 // громкость
 sounds.hit.volume = 0.4
 sounds.coin.volume = 0.5
 sounds.levelUp.volume = 0.5
+sounds.bullet.volume = 0.3
 
 export const playSound = (name: SoundName) => {
 	const sound = sounds[name]
@@ -22,3 +27,9 @@ export const playSound = (name: SoundName) => {
 
 	sound.play().catch(() => {})
 }
+
+
+export const asteroidsAudio = new Audio(asteroidsSound)
+
+asteroidsAudio.loop = true
+asteroidsAudio.volume = 0.3

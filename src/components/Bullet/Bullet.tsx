@@ -1,19 +1,21 @@
-import s from './Bullet.module.scss'
+import bulletImg from '../../assets/images/bullet.png'
+import s from './bullet.module.scss'
 
-type BulletProps = {
-	id: number
+type Props = {
 	x: number
-	onRemove: (id: number) => void
+	y: number
 }
 
-const Bullet = ({ id, x, onRemove }: BulletProps) => {
+const Bullet = ({ x, y }: Props) => {
 	return (
-		<div
+		<img
+			src={bulletImg}
 			className={s.bullet}
 			style={{
-				left: x + 'px',
+				left: x,
+				top: y,
 			}}
-			onAnimationEnd={() => onRemove(id)}
+			alt="bullet"
 		/>
 	)
 }

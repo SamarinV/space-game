@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { SettingsType } from '../../game/game'
 import { applyDamage } from '../enemy/applyDamage'
+import { asteroidsAudio } from '../sound/soundManager'
 
 type PropsType = {
 	settings: SettingsType
@@ -62,7 +63,6 @@ export const useAsteroids = ({ settings, setSettings, setShipHit }: PropsType) =
 
 		const interval = setInterval(() => {
 			setShipHit(true)
-
 			setTimeout(() => {
 				setShipHit(false)
 			}, 300)
@@ -72,4 +72,19 @@ export const useAsteroids = ({ settings, setSettings, setShipHit }: PropsType) =
 
 		return () => clearInterval(interval)
 	}, [settings.withAsteroids, settings.isPaused, setSettings])
+
+	useEffect(() => {
+		if (!settings.withAsteroids) {
+			asteroidsAudio.pause()
+			asteroidsAudio.currentTime = 0
+			return
+		}
+
+		asteroidsAudio.play().catch(() => {})
+
+		return () => {
+			asteroidsAudio.pause()
+			asteroidsAudio.currentTime = 0
+		}
+	}, [settings.withAsteroids])
 }

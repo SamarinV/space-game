@@ -13,9 +13,10 @@ type Props = {
 	hit: boolean
 	shieldLevel: number
 	dronesLevel: number
+	onShoot: (x: number, y: number) => void
 }
 
-const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel, dronesLevel }: Props) => {
+const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel, dronesLevel, onShoot }: Props) => {
 	const [droneActive, setDroneActive] = useState([false, false, false, false])
 	const [healPulse, setHealPulse] = useState([false, false, false, false])
 	const [shieldPulse, setShieldPulse] = useState(false)
@@ -89,7 +90,21 @@ const Spaceship = ({ shieldIsHolding, withShield, withDrones, hit, shieldLevel, 
 					</div>
 				)
 			)}
-			<img src={ship} alt="spaceship" className={s.ship} />
+			<img
+				src={ship}
+				alt="spaceship"
+				className={s.ship}
+				onClick={(e) => {
+					const rect = e.currentTarget.getBoundingClientRect()
+
+					onShoot(rect.left + rect.width / 2 - 10, rect.top)
+				}}
+				onTouchStart={(e) => {
+					const rect = e.currentTarget.getBoundingClientRect()
+
+					onShoot(rect.left + rect.width / 2 - 10, rect.top)
+				}}
+			/>
 			{hit && <img src={explosion} alt="explosion" className={s.explosion} />}
 
 			<div className={s.drones}>

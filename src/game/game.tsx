@@ -12,8 +12,17 @@ import { playSound } from '../components/sound/soundManager'
 import Spaceship from '../components/spaceShip/spaceShip'
 import Stars from '../components/stars/stars'
 import s from './game.module.scss'
+import { useBullets } from '../components/hooks/useBullets'
+import Bullet from '../components/Bullet/Bullet'
+import { useBulletCollision } from '../components/hooks/useBulletCollision'
 
 export type SpawnElementsType = {
+	id: number
+	x: number
+	y: number
+}
+
+export type BulletType = {
 	id: number
 	x: number
 	y: number
@@ -46,6 +55,7 @@ const Game = () => {
 	const [enemy, setEnemy] = useState<SpawnElementsType | null>(null)
 	const [shipHit, setShipHit] = useState<boolean>(false)
 	const [buttonsIsBlock, setButtonsIsBlock] = useState(false)
+	const { bullets, setBullets, shoot } = useBullets()
 	const [settings, setSettings] = useState<SettingsType>({
 		dronesLevel: 0,
 		withDrones: false,
@@ -70,6 +80,13 @@ const Game = () => {
 	useSpawn({ settings, enemy, ruble, setEnemy, setRuble })
 	useMovement({ settings, setSettings, setEnemy, setRuble, setShipHit })
 	useBackgroundMusic()
+	useBulletCollision({
+		bullets,
+		setBullets,
+		enemy,
+		setEnemy,
+		setSettings,
+	})
 
 	const shieldIsHolding = settings.withShield && settings.shield > 0
 
@@ -90,9 +107,9 @@ const Game = () => {
 		removeElement('ruble')
 	}
 	const handleEnemyClick = () => {
-		setSettings((prev) => ({ ...prev, money: prev.money + 10 }))
-		setSettings((prev) => ({ ...prev, score: prev.score + 10 }))
-		removeElement('enemy')
+		// setSettings((prev) => ({ ...prev, money: prev.money + 10 }))
+		// setSettings((prev) => ({ ...prev, score: prev.score + 10 }))
+		// removeElement('enemy')
 	}
 
 	const levelUpDrones = () => {
@@ -202,6 +219,7 @@ const Game = () => {
 				shieldIsHolding={shieldIsHolding}
 				shieldLevel={settings.shieldLevel}
 				dronesLevel={settings.dronesLevel}
+				onShoot={shoot}
 			/>
 
 			{!settings.withAsteroids && ruble && (
@@ -233,6 +251,9 @@ const Game = () => {
 					</button>
 				</div>
 			)}
+			{bullets.map((bullet) => (
+				<Bullet key={bullet.id} x={bullet.x} y={bullet.y} />
+			))}
 		</>
 	)
 }

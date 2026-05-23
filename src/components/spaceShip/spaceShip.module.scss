@@ -13,9 +13,9 @@
 	position: block;
 	background: transparent;
 	width: 100px;
-	user-select: none;
-	pointer-events: none;
-	z-index: 100;
+	// user-select: none;
+	// pointer-events: none;
+	z-index: 1000;
 }
 
 .withShield {
@@ -257,8 +257,6 @@
 		transform: translate(-50%, -20px);
 	}
 }
-
-
 
 @media (max-width: 500px) {
 	.container {
