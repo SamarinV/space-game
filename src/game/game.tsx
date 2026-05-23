@@ -51,8 +51,8 @@ export type SettingsType = {
 const price = { drone: 10, shield: 10 }
 
 const Game = () => {
-	const [ruble, setRuble] = useState<SpawnElementsType | null>(null)
 	const [enemy, setEnemy] = useState<SpawnElementsType | null>(null)
+	const [ruble, setRuble] = useState<SpawnElementsType | null>(null)
 	const [shipHit, setShipHit] = useState<boolean>(false)
 	const [buttonsIsBlock, setButtonsIsBlock] = useState(false)
 	const { bullets, setBullets, shoot } = useBullets()
