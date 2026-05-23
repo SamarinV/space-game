@@ -64,8 +64,8 @@ const Game = () => {
 		isPaused: true,
 		isStartedGame: false,
 	})
-	useDrones({ settings, setSettings })
 	useShield({ settings, setSettings })
+	useDrones({ settings, setSettings })
 	useAsteroids({ setSettings, settings, setShipHit })
 	useSpawn({ settings, enemy, ruble, setEnemy, setRuble })
 	useMovement({ settings, setSettings, setEnemy, setRuble, setShipHit })
