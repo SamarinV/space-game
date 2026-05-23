@@ -13,8 +13,8 @@ import Spaceship from '../components/spaceShip/spaceShip'
 import Stars from '../components/stars/stars'
 import s from './game.module.scss'
 import { useBullets } from '../components/hooks/useBullets'
-import Bullet from '../components/Bullet/Bullet'
 import { useBulletCollision } from '../components/hooks/useBulletCollision'
+import Bullet from '../components/bullet/bullet'
 
 export type SpawnElementsType = {
 	id: number
