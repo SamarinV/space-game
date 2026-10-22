@@ -158,3 +158,61 @@
   .dialog p { line-height: 1.65; }
   .screenNote { font-size: 10px; }
 }
+.vitals { position: absolute; z-index: 8; top: 80px; left: 26px; right: 26px; display: grid; grid-template-columns: minmax(0, 210px) minmax(0, 210px) 1fr; gap: 16px; pointer-events: none; }
+.vital { padding: 11px 12px 9px; border: 1px solid #41505d; border-radius: 8px; background: #101b28eb; min-width: 0; }
+.vitalLabel { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 9px; font: 10px monospace; color: #c3d1dc; letter-spacing: .7px; }
+.vitalLabel b { font: bold 15px monospace; color: #f0f5f8; white-space: nowrap; }
+.vitalLabel small { font-size: 10px; font-weight: 400; color: #99aab8; }
+.vitalTrack { height: 9px; border-radius: 3px; background: #35434e; overflow: hidden; }
+.vitalTrack i { display: block; height: 100%; transition: width .2s ease-out; }
+.hpFill { background: linear-gradient(90deg, #85c85d, #c5f799); box-shadow: 0 0 12px #a6f27e55; }
+.shieldFill { background: linear-gradient(90deg, #5088dc, #8ed9ff); box-shadow: 0 0 12px #7bc8ff55; }
+.vitalNote { display: block; color: #9bafbf; font-size: 9px; margin-top: 7px; line-height: 1.4; }
+.critical { border-color: #ed796a; }
+.critical .vitalLabel, .critical .vitalNote { color: #ff9d8f; }
+.critical .hpFill { background: #ff786c; box-shadow: 0 0 12px #ff786c66; }
+.vitalMoney { justify-self: end; align-self: start; color: #c5f799; font: 18px monospace; padding: 10px 0; }
+.warning { top: 175px; }
+.screenNote { top: 170px; }
+@media (max-width: 760px) {
+  .vitals { top: 68px; left: 12px; right: 12px; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .vital { padding: 8px; }
+  .vitalLabel { font-size: 9px; letter-spacing: 0; gap: 4px; margin-bottom: 6px; }
+  .vitalLabel b { font-size: 14px; }
+  .vitalTrack { height: 8px; }
+  .vitalNote { font-size: 8px; margin-top: 6px; }
+  .vitalMoney { position: absolute; right: 0; top: -33px; padding: 0; font-size: 12px; }
+  .stormLabel, .warning { top: 157px; }
+  .screenNote { top: 182px; }
+  .overlay { padding-top: 140px; padding-bottom: 75px; }
+  .dialog { padding-bottom: 0; max-height: 100%; overflow-y: auto; }
+  .dialog h1 { font-size: clamp(27px, 7vw, 42px); }
+  .eyebrow { margin-bottom: 14px; }
+  .introHint { margin-top: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .vitalTrack i { transition: none; } }
+@media (max-width: 760px) {
+  .vitalMoney { right: auto; left: 50%; top: -42px; transform: translateX(-50%); width: max-content; }
+}
+/* Focus on a moving collectible must not scroll the cockpit inside the field. */
+.arena { overflow: clip; }
+/* Compact in-flight instruments; menus use the field without HUD overlap. */
+.vitals { z-index: 5; grid-template-columns: minmax(0, 180px) minmax(0, 180px) 1fr; gap: 10px; }
+.vital { padding: 8px 10px; }
+.vitalLabel { margin-bottom: 6px; }
+.vitalTrack { height: 7px; }
+.vitalNote { margin-top: 5px; }
+@media (max-width: 760px) {
+  .vitals { top: 62px; left: 12px; right: 12px; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .vital { padding: 6px 8px; border-radius: 5px; }
+  .vitalLabel { font-size: 8px; margin-bottom: 4px; }
+  .vitalLabel b { font-size: 12px; }
+  .vitalLabel small { font-size: 9px; }
+  .vitalTrack { height: 5px; }
+  .vitalNote { display: none; }
+  .vitalMoney { top: -36px; }
+  .stormLabel, .warning { top: 110px; }
+  .screenNote { top: 135px; }
+  .overlay { padding: 25px 25px 95px; }
+  .dialog { max-height: 100%; }
+}

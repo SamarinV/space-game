@@ -4,6 +4,28 @@ import { collect, createRun, damage, step, storm, upgrade } from './engine.ts'
 
 const idle = { dx: 0, dy: 0, target: null }
 
+test('enemy spawn interval is doubled while asteroid frequency stays unchanged', () => {
+  const run = createRun(800, 600, 'playing')
+  assert.equal(run.spawn, 1.6)
+  run.spawn = 0
+  step(run, .016, idle, () => .2)
+  assert.equal(run.spawn, 2 * (1.7 - .08))
+  run.time = 35; run.spawn = 0
+  step(run, .016, idle, () => .2)
+  assert.equal(run.spawn, .65)
+})
+
+test('enemy cannot fire at a player above it and resumes when player is below', () => {
+  const run = createRun(800, 600, 'playing')
+  run.x = 600; run.y = 120; run.fire = 100; run.spawn = 100
+  run.entities = [{ id: 10, kind: 'enemy', x: 100, y: 250, speed: 0, hp: 3, cooldown: 0 }]
+  step(run, .016, idle)
+  assert.equal(run.entities.some(e => e.kind === 'hostile'), false)
+  run.y = 400
+  step(run, .016, idle)
+  assert.equal(run.entities.some(e => e.kind === 'hostile'), true)
+})
+
 test('pause freezes simulation and prevents collecting coins', () => {
   const run = createRun(800, 600, 'paused')
   run.entities.push({ id: 3, kind: 'coin', x: 100, y: 200, speed: 100 })
@@ -133,7 +155,7 @@ test('enemy and asteroid survive the first player bullet', () => {
   }
 })
 
-test('taking damage locks regeneration for six seconds, then shield recharges slowly', () => {
+test('taking damage locks regeneration for six seconds, then modules recover at the increased rates', () => {
   const run = createRun(800, 600, 'playing')
   run.shieldLevel = 1; run.droneLevel = 5; run.shield = 30; run.hp = 60
   run.spawn = 100; run.coinSpawn = 100
@@ -142,8 +164,8 @@ test('taking damage locks regeneration for six seconds, then shield recharges sl
   assert.equal(run.shield, 12)
   assert.equal(run.hp, 60)
   for (let i = 0; i < 60; i++) step(run, .05, idle)
-  assert.ok(run.shield > 12 && run.shield <= 13.01)
-  assert.ok(run.hp > 60 && run.hp <= 61.51)
+  assert.ok(run.shield >= 14.8 && run.shield <= 15.01)
+  assert.ok(run.hp >= 65.6 && run.hp <= 66.01)
   damage(run, 1)
   assert.equal(run.rechargeDelay, 6)
 })

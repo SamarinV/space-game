@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { collect, cost, createRun, shieldCapacity, step, storm, upgrade, wave } from './engine'
+import { collect, cost, createRun, hullRecovery, shieldCapacity, step, storm, upgrade, wave } from './engine'
 import type { Input, Run } from './engine'
 import ship from '../assets/images/ship.png'
 import enemy from '../assets/images/enemy1.png'
@@ -39,7 +39,13 @@ export default function Game() {
     const old = model.current
     model.current = createRun(old.width, old.height, 'playing')
     input.current = { dx: 0, dy: 0, target: null }; keys.current.clear(); setHelp(false); publish()
-    if (!muted) music.current?.play().catch(() => {})
+    // Start playback inside the user gesture, including after a previously muted run.
+    setMuted(false)
+    setSoundEnabled(true)
+    if (music.current) {
+      music.current.currentTime = 0
+      music.current.play().catch(() => {})
+    }
   }
   const pause = () => {
     if (model.current.phase === 'playing') model.current.phase = 'paused'
@@ -115,8 +121,10 @@ export default function Game() {
     }
   }, [run.score, best])
   useEffect(() => {
-    const audio = new Audio(musicFile); audio.loop = true; audio.volume = .16; music.current = audio
-    return () => { audio.pause(); music.current = null }
+    const audio = music.current
+    if (!audio) return
+    audio.volume = .16
+    return () => { audio.pause() }
   }, [])
   useEffect(() => {
     setSoundEnabled(!muted)
@@ -163,6 +171,7 @@ export default function Game() {
   }
   return (
     <main className={s.app}>
+      <audio ref={music} src={musicFile} loop preload="auto" />
       <header className={s.header}>
         <a className={s.brand} href="./" aria-label="Орбита — главная"><span className={s.logo}>✳</span> ORBIT<span className={s.brandSuffix}> / ОРБИТА</span></a>
         <div className={s.headerRight}><span className={s.record}>РЕКОРД <b>{best.toLocaleString('ru-RU')}</b></span><button className={s.iconButton} onClick={() => setMuted(v => !v)} aria-label={muted ? 'Включить звук' : 'Выключить звук'} title={muted ? 'Включить звук' : 'Выключить звук'}>{muted ? '♪̸' : '♪'}</button><button className={s.iconButton} aria-label="Как играть" onClick={() => { if (active) pause(); setHelp(v => !v) }}>?</button></div>
@@ -174,7 +183,23 @@ export default function Game() {
             <div className={s.starfield} style={{ animationPlayState: active ? 'running' : 'paused' }}>{stars.map((star, i) => <i key={i} style={star} />)}</div>
             <div className={s.planet} /><div className={s.orbitLine} />
             <div className={s.arenaHud}><div><span>СЧЁТ</span><strong>{String(run.score).padStart(5, '0')}</strong></div><div className={s.flightTime}><span>ВРЕМЯ ПОЛЁТА</span><strong>{timeLabel(run.time)}</strong></div></div>
-            <div className={s.mobileTelemetry}><span>КОРПУС <b>{Math.ceil(run.hp)}%</b></span><span>ЩИТ <b>{Math.floor(run.shield)} / {shieldCapacity(run.shieldLevel)}</b></span><span><b>{run.money} ₽</b></span></div>
+            {active && !help && <div className={s.vitals}>
+              <div className={`${s.vital} ${run.hp <= 30 ? s.critical : ''}`}>
+                <div className={s.vitalLabel}><span>♥ КОРПУС</span><b>{Math.ceil(run.hp)} <small>/ 100</small></b></div>
+                <div className={s.vitalTrack} role="progressbar" aria-label="Жизни корабля" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.ceil(run.hp)}>
+                  <i className={s.hpFill} style={{ width: `${run.hp}%` }} />
+                </div>
+                <span className={s.vitalNote}>{run.hp <= 30 ? 'Критический урон — уклоняйтесь!' : run.droneLevel ? `Ремонт: ${run.rechargeDelay > 0 ? `через ${Math.ceil(run.rechargeDelay)} с` : `+${hullRecovery(run.droneLevel).toFixed(1)} / с`}` : 'Дроны не установлены'}</span>
+              </div>
+              <div className={s.vital}>
+                <div className={s.vitalLabel}><span>◈ ЩИТ</span><b>{Math.floor(run.shield)} <small>/ {shieldCapacity(run.shieldLevel) || '—'}</small></b></div>
+                <div className={s.vitalTrack} role="progressbar" aria-label="Заряд щита" aria-valuemin={0} aria-valuemax={shieldCapacity(run.shieldLevel) || 1} aria-valuenow={Math.floor(run.shield)} aria-valuetext={run.shieldLevel ? `${Math.floor(run.shield)} из ${shieldCapacity(run.shieldLevel)}` : 'Щит не установлен'}>
+                  <i className={s.shieldFill} style={{ width: `${run.shieldLevel ? run.shield / shieldCapacity(run.shieldLevel) * 100 : 0}%` }} />
+                </div>
+                <span className={s.vitalNote}>{run.shieldLevel ? run.rechargeDelay > 0 ? `Зарядка через ${Math.ceil(run.rechargeDelay)} с` : 'Автоматическая зарядка' : 'Щит не установлен'}</span>
+              </div>
+              <span className={s.vitalMoney}>{run.money} ₽</span>
+            </div>}
             {active && <div className={`${s.stormLabel} ${isStorm ? s.warning : ''}`}>{isStorm ? '☄ АСТЕРОИДНОЕ ПОЛЕ · УКЛОНЯЙТЕСЬ' : `ДО АСТЕРОИДОВ ${Math.ceil(35 - run.time % 44)} С`}</div>}
             {run.entities.map(e => {
               if (e.kind === 'bullet' || e.kind === 'hostile') return <i key={e.id} className={e.kind === 'bullet' ? s.bullet : s.hostile} style={{ left: e.x, top: e.y }} />
@@ -203,7 +228,7 @@ export default function Game() {
                 const level = kind === 'shield' ? run.shieldLevel : run.droneLevel
                 const title = kind === 'shield' ? 'Щит' : 'Дроны'
                 const available = (active || run.phase === 'paused') && level < 5 && run.money >= cost(level)
-                return <button key={kind} className={s.dockButton} disabled={!available} onClick={() => buy(kind)} aria-label={`Улучшить ${title}: ${level >= 5 ? 'максимальный уровень' : cost(level) + ' рублей'}`} title={kind === 'shield' ? 'Ёмкость +15. Регенерация после 6 с без урона.' : 'Ремонт +0,15 ед./с после 6 с без урона.'}>
+                return <button key={kind} className={s.dockButton} disabled={!available} onClick={() => buy(kind)} aria-label={`Улучшить ${title}: ${level >= 5 ? 'максимальный уровень' : cost(level) + ' рублей'}`} title={kind === 'shield' ? 'Ёмкость +15. Регенерация после 6 с без урона.' : 'Ремонт +0,6 ед./с после 6 с без урона.'}>
                   <img src={kind === 'shield' ? shield : drone} alt="" />
                   <span><strong>{title} <small>{level}/5</small></strong><span>{level >= 5 ? 'МАКС.' : `+ ${cost(level)} ₽`}</span></span>
                 </button>

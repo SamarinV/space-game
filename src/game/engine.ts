@@ -23,12 +23,14 @@ export const wave = (run: Run) => 1 + Math.floor(run.time / 25)
 export const storm = (run: Run) => run.time % 44 >= 35
 export const cost = (level: number) => 30 + level * 30
 export const shieldCapacity = (level: number) => level ? 30 + level * 15 : 0
+export const hullRecovery = (level: number) => level * .6
+export const shieldRecovery = (level: number) => level ? 1 + level * .5 : 0
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 export function createRun(width = 900, height = 650, phase: Phase = 'ready'): Run {
   return {
     phase, width, height, x: width / 2, y: height - 155, hp: 100, shield: 0,
     shieldLevel: 0, droneLevel: 0, score: 0, money: 0, kills: 0, collected: 0, time: 0,
-    entities: [], effects: [], nextId: 1, spawn: .8, coinSpawn: 1.5, fire: 0,
+    entities: [], effects: [], nextId: 1, spawn: 1.6, coinSpawn: 1.5, fire: 0,
     invincible: 0, rechargeDelay: 0,
   }
 }
@@ -75,8 +77,8 @@ export function step(run: Run, seconds: number, input: Input, random = Math.rand
   run.x = clamp(run.x, 28, run.width - 28)
   run.y = clamp(run.y, 110, run.height - 120)
   if (recovering) {
-    run.hp = Math.min(100, run.hp + run.droneLevel * .15 * dt)
-    if (run.shieldLevel) run.shield = Math.min(shieldCapacity(run.shieldLevel), run.shield + (.35 + run.shieldLevel * .15) * dt)
+    run.hp = Math.min(100, run.hp + hullRecovery(run.droneLevel) * dt)
+    if (run.shieldLevel) run.shield = Math.min(shieldCapacity(run.shieldLevel), run.shield + shieldRecovery(run.shieldLevel) * dt)
   }
   const add = (kind: Entity['kind'], x: number, y: number, velocity: number, extra: Partial<Entity> = {}) =>
     run.entities.push({ id: run.nextId++, kind, x, y, speed: velocity, ...extra })
@@ -87,7 +89,7 @@ export function step(run: Run, seconds: number, input: Input, random = Math.rand
     add(isStorm ? 'asteroid' : 'enemy', 28 + random() * (run.width - 56), -35,
       (isStorm ? 130 : 65) + Math.min(wave(run), 15) * 8,
       { hp, maxHp: hp, cooldown: .6, vx: random() < .5 ? -28 : 28 })
-    run.spawn = isStorm ? .65 : Math.max(.65, 1.7 - wave(run) * .08)
+    run.spawn = isStorm ? .65 : 2 * Math.max(.65, 1.7 - wave(run) * .08)
   }
   if (run.coinSpawn <= 0) {
     add('coin', 30 + random() * (run.width - 60), -24, 85)
@@ -101,7 +103,7 @@ export function step(run: Run, seconds: number, input: Input, random = Math.rand
       e.x += (e.vx ?? 0) * dt
       if (e.x < 28 || e.x > run.width - 28) { e.x = clamp(e.x, 28, run.width - 28); e.vx = -(e.vx ?? 0) }
       e.cooldown = (e.cooldown ?? .6) - dt
-      if (e.cooldown <= 0 && e.y > 35 && e.y < run.height - 140) {
+      if (e.cooldown <= 0 && e.y > 35 && e.y < run.height - 140 && run.y >= e.y) {
         // Aim at the current position; the shot cannot track a moving player.
         const dx = run.x - e.x, dy = run.y - e.y
         const distance = Math.max(1, Math.hypot(dx, dy))
