@@ -71,7 +71,7 @@ export const useAsteroids = ({ settings, setSettings, setShipHit }: PropsType) =
 		}, 500)
 
 		return () => clearInterval(interval)
-	}, [settings.withAsteroids, settings.isPaused, setSettings])
+	}, [settings.withAsteroids, settings.isPaused, setSettings, setShipHit])
 
 	useEffect(() => {
 		if (!settings.withAsteroids) {

@@ -1,73 +1,33 @@
-# React + TypeScript + Vite
+# ORBIT / Орбита
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Космический аркадный шутер на React, TypeScript и Vite.
 
-Currently, two official plugins are available:
+## Запуск
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Требуется Node.js 24+ (тесты используют встроенную поддержку TypeScript).
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Управление
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- WASD или стрелки — движение. Удерживайте кнопку мыши или ведите пальцем по игровому полю для управления указателем.
+- Орудие стреляет автоматически с интервалом 0,55 с. Враг на первом секторе выдерживает 3 попадания, астероид — 8. Полоска под целью показывает её прочность.
+- Собирайте монеты кораблём или нажатием: +10 ₽ и +10 очков. Уничтожение врага: +25 очков и +5 ₽; астероида: +60 очков и +10 ₽.
+- Пробел, P, Esc или кнопка в углу поля — пауза. При потере фокуса игра автоматически приостанавливается.
+- Щит и ремонтные дроны покупаются кнопками внизу игрового поля, в том числе на паузе. Кнопка ⛶ справа внизу включает полный экран; при ограничениях браузера поле разворачивается на всё окно. Все кнопки остаются внутри поля.
+- Щит поглощает урон; остаток урона проходит в корпус. После попадания восстановление щита и ремонт дронами блокируются на 6 секунд. Щит восстанавливает 0,5–1,1 ед./с, дроны — 0,15 ед. корпуса/с за уровень. Улучшение щита добавляет ёмкость и 15 заряда (при первой установке 30), но не заполняет щит целиком.
+- Каждые 25 секунд повышается сектор и сложность. Каждые 44 секунды последние 9 секунд идёт астероидный дождь. Враги стреляют в позицию корабля. Красные снаряды нельзя сбить, от них нужно уклоняться. Врагов и астероиды можно облететь или уничтожить.
+- Рекорд и настройка звука сохраняются локально в браузере.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Проверка
+
+```sh
+npm test
+npm run lint
+npm run build
 ```
+
+Игровая симуляция находится в `src/game/engine.ts` и проверяется независимо от интерфейса. Старые компоненты в `src/components` сохранены для совместимости; текущая игра использует единый цикл `requestAnimationFrame`.

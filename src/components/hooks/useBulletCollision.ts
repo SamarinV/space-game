@@ -34,5 +34,5 @@ export const useBulletCollision = ({ bullets, setBullets, enemy, setEnemy, setSe
 
 		// 🚀 удалить пулю
 		setBullets((prev) => prev.filter((b) => b.id !== hitBullet.id))
-	}, [bullets, enemy])
+	}, [bullets, enemy, setBullets, setEnemy, setSettings])
 }

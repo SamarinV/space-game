@@ -8,22 +8,17 @@ export default defineConfig({
 		VitePWA({
 			registerType: 'autoUpdate',
 			manifest: {
-				name: 'My PWA App',
-				short_name: 'PWA',
+				name: 'ORBIT / Орбита',
+				short_name: 'Орбита',
 				start_url: '/',
 				display: 'standalone',
-				background_color: '#ffffff',
-				theme_color: '#317EFB',
+				background_color: '#14181c',
+				theme_color: '#14181c',
 				icons: [
 					{
-						src: '/icon-192.png',
-						sizes: '192x192',
-						type: 'image/png',
-					},
-					{
-						src: '/icon-512.png',
-						sizes: '512x512',
-						type: 'image/png',
+						src: '/orbit.svg',
+						sizes: 'any',
+						type: 'image/svg+xml',
 					},
 				],
 			},

@@ -62,5 +62,5 @@ export const useMovement = ({ settings, setSettings, setEnemy, setRuble, setShip
 		}, 16)
 
 		return () => clearInterval(interval)
-	}, [settings.speed, settings.isPaused])
+	}, [settings.speed, settings.isPaused, setEnemy, setRuble, setSettings, setShipHit])
 }

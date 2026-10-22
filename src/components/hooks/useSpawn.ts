@@ -40,7 +40,7 @@ useEffect(() => {
 	}, 2000)
 
 	return () => clearInterval(interval)
-}, [ruble, enemy, settings.withAsteroids, settings.isStartedGame, settings.isPaused])
+}, [ruble, enemy, settings.withAsteroids, settings.isStartedGame, settings.isPaused, setEnemy, setRuble])
 
 
 }

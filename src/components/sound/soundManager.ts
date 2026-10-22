@@ -20,7 +20,13 @@ sounds.coin.volume = 0.5
 sounds.levelUp.volume = 0.5
 sounds.bullet.volume = 0.3
 
+let enabled = true
+export const setSoundEnabled = (value: boolean) => {
+	enabled = value
+	if (!value) Object.values(sounds).forEach(sound => sound.pause())
+}
 export const playSound = (name: SoundName) => {
+	if (!enabled) return
 	const sound = sounds[name]
 
 	sound.currentTime = 0

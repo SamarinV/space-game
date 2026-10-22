@@ -18,5 +18,5 @@ export const useShield = ({ settings, setSettings }: PropsType) => {
 
 			return () => clearInterval(interval)
 		}
-	}, [settings.withShield, settings.shield, settings.shieldLevel, settings.isPaused, settings.shieldMax])
+	}, [settings.withShield, settings.shield, settings.shieldLevel, settings.isPaused, settings.shieldMax, setSettings])
 }
