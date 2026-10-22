@@ -7,7 +7,7 @@
       import React from 'react'
       import { createRoot } from 'react-dom/client'
       import Game from '/src/game/game.tsx'
-      import { createRun } from '/src/game/engine.ts'
+      import { bossAltitude, createRun } from '/src/game/engine.ts'
       import '/src/index.css'
 
       // Visual smoke fixture served by Vite only; not an entry point of the production build.
@@ -21,7 +21,7 @@
       run.money = 60
       run.entities = [
         { id: 1, kind: 'weapon', x: 600, y: 400, speed: 0 },
-        { id: 2, kind: 'boss', x: 450, y: 220, speed: 0, hp: 42, maxHp: 42, age: 4, cooldown: 3 },
+        { id: 2, kind: 'boss', x: 450, y: bossAltitude, speed: 0, hp: 42, maxHp: 42, age: 4, cooldown: 3 },
       ]
       run.nextId = 3
       createRoot(document.getElementById('root')).render(React.createElement(Game, { initialRun: run }))

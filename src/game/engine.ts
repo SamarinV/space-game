@@ -30,6 +30,7 @@ export const cost = (level: number) => 30 + level * 30
 export const shieldCapacity = (level: number) => level ? 30 + level * 15 : 0
 export const hullRecovery = (level: number) => level * .6
 export const shieldRecovery = (level: number) => level ? 1 + level * .5 : 0
+export const bossAltitude = 155
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 export function createRun(width = 900, height = 650, phase: Phase = 'ready'): Run {
   return {
@@ -95,7 +96,8 @@ export function step(run: Run, seconds: number, input: Input, random = Math.rand
     run.x += input.dx / norm * speed; run.y += input.dy / norm * speed
   }
   run.x = clamp(run.x, 28, run.width - 28)
-  run.y = clamp(run.y, 110, run.height - 120)
+  const bossEncounter = fightingBoss || Math.floor(encounterTime(run) / 44) > run.bossCycle
+  run.y = clamp(run.y, bossEncounter ? bossAltitude + 105 : 110, run.height - 120)
   if (recovering) {
     run.hp = Math.min(100, run.hp + hullRecovery(run.droneLevel) * dt)
     if (run.shieldLevel) run.shield = Math.min(shieldCapacity(run.shieldLevel), run.shield + shieldRecovery(run.shieldLevel) * dt)
@@ -139,7 +141,7 @@ export function step(run: Run, seconds: number, input: Input, random = Math.rand
     if (e.kind === 'hostile' || e.kind === 'bullet') e.x += (e.vx ?? 0) * dt
     if (e.kind === 'boss') {
       e.age = (e.age ?? 0) + dt
-      const destination = Math.min(230, Math.max(220, run.height * .32))
+      const destination = bossAltitude
       e.y = Math.min(destination, e.y + 85 * dt)
       e.x = run.width / 2 + Math.sin(e.age * .55) * Math.max(0, run.width / 2 - 100)
       e.cooldown = (e.cooldown ?? 1.4) - dt

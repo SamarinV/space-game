@@ -13,6 +13,7 @@ const sounds: Record<SoundName, HTMLAudioElement> = {
 	asteroids: new Audio(asteroidsSound),
 	bullet: new Audio(bulletSound),
 }
+Object.values(sounds).forEach(sound => { sound.preload = 'none' })
 
 // громкость
 sounds.hit.volume = 0.4
@@ -36,6 +37,7 @@ export const playSound = (name: SoundName) => {
 
 
 export const asteroidsAudio = new Audio(asteroidsSound)
+asteroidsAudio.preload = 'none'
 
 asteroidsAudio.loop = true
 asteroidsAudio.volume = 0.3

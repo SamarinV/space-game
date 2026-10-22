@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { collect, collectWeapon, createRun, damage, encounterTime, step, storm, upgrade } from './engine.ts'
+import { bossAltitude, collect, collectWeapon, createRun, damage, encounterTime, step, storm, upgrade } from './engine.ts'
 
 const idle = { dx: 0, dy: 0, target: null }
 
@@ -297,10 +297,10 @@ test('boss arrives only after the asteroid storm, hovers and fires three cannons
   assert.ok(boss)
   assert.equal(storm(run), false)
   assert.equal(run.bossCycle, 1)
-  boss.y = 220; boss.cooldown = 0
+  boss.y = bossAltitude; boss.cooldown = 0
   const x = boss.x
   step(run, .05, idle)
-  assert.equal(boss.y, 220)
+  assert.equal(boss.y, bossAltitude)
   assert.notEqual(boss.x, x)
   const shots = run.entities.filter(e => e.kind === 'hostile')
   assert.equal(shots.length, 3)
@@ -318,7 +318,7 @@ test('boss kill grants reward once, clears hostile shots, resumes sector and nev
   run.time = 44; run.fire = 100; run.spawn = 100
   step(run, 0, idle)
   const boss = run.entities.find(e => e.kind === 'boss')!
-  boss.hp = 1; boss.y = 220
+  boss.hp = 1; boss.y = bossAltitude
   run.entities.push(
     { id: 100, kind: 'bullet', x: boss.x, y: boss.y, speed: 0 },
     { id: 101, kind: 'hostile', x: run.x, y: run.y, speed: 0 },
@@ -337,12 +337,30 @@ test('boss kill grants reward once, clears hostile shots, resumes sector and nev
 
 test('long boss fights suspend the asteroid cycle and keep a single living boss', () => {
   const run = createRun(800, 650, 'playing')
-  run.time = 44; run.y = 110; run.fire = 1000
+  run.time = 44; run.y = 110; run.fire = 1000; run.invincible = 1000
   step(run, 0, idle)
   for (let i = 0; i < 1200; i++) step(run, .05, idle)
+  assert.equal(run.phase, 'playing')
+  assert.ok(run.time > 103)
   assert.ok(Math.abs(encounterTime(run) - 44) < .001)
   assert.equal(storm(run), false)
   assert.equal(run.bossCycle, 1)
   assert.equal(run.entities.filter(e => e.kind === 'boss').length, 1)
   assert.equal(run.entities.some(e => e.kind === 'enemy' || e.kind === 'asteroid'), false)
+})
+
+
+test('boss holds the same top altitude on phone and desktop and player cannot hide above it', () => {
+  for (const [width, height] of [[360, 510], [390, 669], [1300, 850]]) {
+    const run = createRun(width, height, 'playing')
+    run.time = 44; run.invincible = 1000; run.fire = 1000
+    step(run, 0, idle)
+    const boss = run.entities.find(e => e.kind === 'boss')!
+    for (let i = 0; i < 300; i++) step(run, .05, { dx: 0, dy: -1, target: { x: run.width / 2, y: 0 } })
+    assert.equal(boss.y, bossAltitude)
+    assert.ok(boss.y < height / 3)
+    assert.ok(run.y >= boss.y + 105)
+    assert.ok(run.y <= height - 120)
+    assert.equal(run.entities.filter(e => e.kind === 'boss').length, 1)
+  }
 })

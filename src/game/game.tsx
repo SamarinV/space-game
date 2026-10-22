@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { collect, collectWeapon, cost, createRun, encounterTime, hullRecovery, shieldCapacity, step, storm, upgrade, wave, weaponNames } from './engine'
 import type { Input, Run } from './engine'
-import ship from '../assets/images/ship.png'
-import enemy from '../assets/images/enemy1.png'
-import asteroid from '../assets/images/asteroid.png'
-import coin from '../assets/images/ruble.png'
-import drone from '../assets/images/drone.png'
-import shield from '../assets/images/shield.png'
+import ship from '../assets/images/ship.webp'
+import enemy from '../assets/images/enemy1.webp'
+import asteroid from '../assets/images/asteroid.webp'
+import coin from '../assets/images/ruble.webp'
+import drone from '../assets/images/drone.webp'
+import shield from '../assets/images/shield.webp'
 import bossImage from '../assets/images/boss.svg'
 import musicFile from '../assets/sounds/space.mp3'
 import { playSound, setSoundEnabled } from '../components/sound/soundManager'
 import s from './game.module.scss'
+import { preloadImages } from './assets'
 
 // Compatibility with the original standalone components.
 export type SpawnElementsType = { id: number; x: number; y: number }
@@ -18,6 +19,7 @@ export type BulletType = SpawnElementsType
 export type SettingsType = { dronesLevel: number; withDrones: boolean; shieldLevel: number; withShield: boolean; score: number; money: number; shield: number; shieldMax: number; lives: number; livesMax: number; speed: number; asteroidsTimer: number; asteroidsLevel: number; withAsteroids: boolean; isPaused: boolean; isStartedGame: boolean }
 function readSaved(key: string, fallback: string) { try { return localStorage.getItem(key) ?? fallback } catch { return fallback } }
 const timeLabel = (time: number) => `${Math.floor(time / 60).toString().padStart(2, '0')}:${Math.floor(time % 60).toString().padStart(2, '0')}`
+const gameImages = [ship, enemy, asteroid, coin, drone, shield, bossImage]
 const stars = Array.from({ length: 65 }, (_, i) => ({ left: `${(i * 37.71) % 100}%`, top: `${(i * 19.37) % 100}%`, opacity: .2 + i % 5 * .14, width: i % 4 === 0 ? 2 : 1 }))
 
 export default function Game({ initialRun }: { initialRun?: Run } = {}) {
@@ -33,11 +35,21 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
   const [fullscreen, setFullscreen] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [screenNote, setScreenNote] = useState('')
+  const [assetsState, setAssetsState] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [assetAttempt, setAssetAttempt] = useState(0)
   const active = run.phase === 'playing'
   const isStorm = storm(run)
   const boss = run.entities.find(e => e.kind === 'boss')
   const publish = () => setRun({ ...model.current, entities: [...model.current.entities] })
+  useEffect(() => {
+    let cancelled = false
+    preloadImages(gameImages).then(() => { if (!cancelled) setAssetsState('ready') })
+      .catch(() => { if (!cancelled) setAssetsState('error') })
+    return () => { cancelled = true }
+  }, [assetAttempt])
+  const retryAssets = () => { setAssetsState('loading'); setAssetAttempt(value => value + 1) }
   const start = () => {
+    if (assetsState !== 'ready') return
     const old = model.current
     model.current = createRun(old.width, old.height, 'playing')
     input.current = { dx: 0, dy: 0, target: null }; keys.current.clear(); setHelp(false); publish()
@@ -109,7 +121,7 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
     let frame = 0, last = 0
     const loop = (now: number) => {
       const r = model.current, wasPlaying = r.phase === 'playing', previousHp = r.hp, previousKills = r.kills, previousCoins = r.collected, previousWeapon = r.weaponLevel
-      step(r, last ? (now - last) / 1000 : 0, input.current)
+      if (assetsState === 'ready') step(r, last ? (now - last) / 1000 : 0, input.current)
       if (r.hp < previousHp || r.kills > previousKills) playSound('hit')
       if (r.collected > previousCoins) playSound('coin')
       if (r.weaponLevel > previousWeapon) playSound('levelUp')
@@ -118,7 +130,7 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
     }
     frame = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(frame)
-  }, [])
+  }, [assetsState])
   useEffect(() => {
     const r = model.current
     if (r.score > best) {
@@ -177,7 +189,7 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
   }
   return (
     <main className={s.app}>
-      <audio ref={music} src={musicFile} loop preload="auto" />
+      <audio ref={music} src={musicFile} loop preload="none" />
       <header className={s.header}>
         <a className={s.brand} href="./" aria-label="Орбита — главная"><span className={s.logo}>✳</span> ORBIT<span className={s.brandSuffix}> / ОРБИТА</span></a>
         <div className={s.headerRight}><span className={s.record}>РЕКОРД <b>{best.toLocaleString('ru-RU')}</b></span><button className={s.iconButton} onClick={() => setMuted(v => !v)} aria-label={muted ? 'Включить звук' : 'Выключить звук'} title={muted ? 'Включить звук' : 'Выключить звук'}>{muted ? '♪̸' : '♪'}</button><button className={s.iconButton} aria-label="Как играть" onClick={() => { if (active) pause(); setHelp(v => !v) }}>?</button></div>
@@ -185,7 +197,7 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
       <section className={s.layout}>
         <div className={s.playColumn}>
           <div className={s.missionBar}><span><i className={s.statusDot} /> {active ? 'МИССИЯ АКТИВНА' : run.phase === 'paused' ? 'МИССИЯ ПРИОСТАНОВЛЕНА' : 'ДАЛЬНИЙ КОСМОС'}</span><span>СЕКТОР {String(wave(run)).padStart(2, '0')} <span className={s.dim}>/ ∞</span></span></div>
-          <div ref={arena} className={`${s.arena} ${isStorm ? s.storm : ''} ${expanded ? s.expanded : ''}`} onPointerDown={pointer} onPointerMove={pointer} onPointerUp={() => { input.current.target = null }} onPointerCancel={() => { input.current.target = null }} aria-label="Игровое поле">
+          <div ref={arena} className={`${s.arena} ${isStorm ? s.storm : ''} ${boss ? s.bossEncounter : ''} ${expanded ? s.expanded : ''}`} onPointerDown={pointer} onPointerMove={pointer} onPointerUp={() => { input.current.target = null }} onPointerCancel={() => { input.current.target = null }} aria-label="Игровое поле">
             <div className={s.starfield} style={{ animationPlayState: active ? 'running' : 'paused' }}>{stars.map((star, i) => <i key={i} style={star} />)}</div>
             <div className={s.planet} /><div className={s.orbitLine} />
             <div className={s.arenaHud}><div><span>СЧЁТ</span><strong>{String(run.score).padStart(5, '0')}</strong></div><div className={s.flightTime}><span>ВРЕМЯ ПОЛЁТА</span><strong>{timeLabel(run.time)}</strong></div></div>
@@ -206,9 +218,9 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
               </div>
               <span className={s.vitalMoney}>{run.money} ₽</span>
             </div>}
-            {active && <div className={`${s.stormLabel} ${isStorm ? s.warning : ''}`}>{boss ? 'БОСС · СТРАЖ ОРБИТЫ' : isStorm ? '☄ АСТЕРОИДНОЕ ПОЛЕ · УКЛОНЯЙТЕСЬ' : `ДО АСТЕРОИДОВ ${Math.ceil(35 - encounterTime(run) % 44)} С`}</div>}
+            {active && !boss && <div className={`${s.stormLabel} ${isStorm ? s.warning : ''}`}>{boss ? 'БОСС · СТРАЖ ОРБИТЫ' : isStorm ? '☄ АСТЕРОИДНОЕ ПОЛЕ · УКЛОНЯЙТЕСЬ' : `ДО АСТЕРОИДОВ ${Math.ceil(35 - encounterTime(run) % 44)} С`}</div>}
             {active && boss && <div className={s.bossHealth}>
-              <div><span>СТРАЖ ОРБИТЫ · {run.bossCycle}</span><b>{Math.max(0, boss.hp ?? 0)} / {boss.maxHp}</b></div>
+              <div><span>СТРАЖ · {run.bossCycle}</span><b>{Math.max(0, boss.hp ?? 0)} / {boss.maxHp}</b></div>
               <div role="progressbar" aria-label="Прочность босса" aria-valuemin={0} aria-valuemax={boss.maxHp} aria-valuenow={Math.max(0, boss.hp ?? 0)}><i style={{ width: `${(boss.hp ?? 0) / (boss.maxHp ?? 1) * 100}%` }} /></div>
             </div>}
             {run.entities.map(e => {
@@ -231,7 +243,8 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
               <span className={s.eyebrow}>{help ? 'БОРТОВОЙ СПРАВОЧНИК' : run.phase === 'over' ? 'СВЯЗЬ ПОТЕРЯНА' : run.phase === 'paused' ? 'МОЖНО ВЫДОХНУТЬ' : 'АРКАДНЫЙ КОСМИЧЕСКИЙ ШУТЕР'}</span>
               <h1>{help ? <>Ваш корабль.<br />Ваши правила.</> : run.phase === 'over' ? 'Хороший полёт.' : run.phase === 'paused' ? 'На паузе.' : <>За пределами<br /><em>знакомых орбит.</em></>}</h1>
               <p>{help ? 'Двигайтесь с помощью WASD или стрелок. На телефоне ведите пальцем по полю. Орудие стреляет раз в 0,55 с. Враги выдерживают 3 попадания и стреляют в вашу позицию. Астероидам нужно 8 попаданий — их проще облететь. Красные снаряды нельзя сбить. Щит и дроны восстанавливаются только после 6 с без урона. Из врагов с шансом 20% выпадает W: двойной выстрел → тройной веер → плазма. Подберите кораблём или нажатием. Урон, даже по щиту, сбрасывает оружие. После астероидов появляется босс с тремя пушками. Покупайте модули кнопками внизу поля. Пробел / P / Esc — пауза.' : run.phase === 'over' ? `Счёт ${run.score} · ${timeLabel(run.time)} в космосе · Сектор ${wave(run)}. Улучшайте защиту, чтобы продержаться дольше.` : run.phase === 'paused' ? 'Купите модули кнопками внизу поля или продолжите полёт.' : 'Пилотируйте. Собирайте. Улучшайте.\nКак далеко вы сможете зайти?'}</p>
-              <button className={s.primary} onClick={() => { if (help) setHelp(false); else if (run.phase === 'paused') pause(); else start() }}>{help ? 'Всё понятно' : run.phase === 'paused' ? 'Продолжить полёт' : run.phase === 'over' ? 'Ещё один полёт' : 'Начать полёт'} <span>↗</span></button>
+              <button className={s.primary} disabled={!help && run.phase !== 'paused' && assetsState === 'loading'} onClick={() => { if (help) setHelp(false); else if (run.phase === 'paused') pause(); else if (assetsState === 'error') retryAssets(); else start() }}>{help ? 'Всё понятно' : run.phase === 'paused' ? 'Продолжить полёт' : assetsState === 'loading' ? 'Загрузка кораблей…' : assetsState === 'error' ? 'Повторить загрузку' : run.phase === 'over' ? 'Ещё один полёт' : 'Начать полёт'} <span>↗</span></button>
+              {assetsState === 'error' && <p className={s.assetError} role="alert">Не удалось загрузить игровые изображения. Проверьте соединение и повторите загрузку.</p>}
               {run.phase === 'ready' && !help && <div className={s.introHint}><kbd>W A S D</kbd><span>или стрелки · на телефоне — касание<br />автострельба · уклоняйтесь от красных снарядов</span></div>}
               {run.phase === 'over' && !help && <span className={s.result}>Целей уничтожено: {run.kills} · Монет собрано: {run.collected}</span>}
             </div></div>}

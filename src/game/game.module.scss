@@ -234,3 +234,20 @@
 }
 .bossHealth { top: 145px; }
 @media (max-width: 760px) { .bossHealth { top: 138px; } }
+/* The boss stays in the top combat area; its health uses the free middle of the top HUD. */
+.bossHealth { top: 24px; width: min(300px, 36%); }
+.primary:disabled { opacity: .65; cursor: wait; transform: none; }
+.assetError { color: #ffb3a5 !important; font-size: 12px !important; margin-top: 12px !important; }
+@media (max-width: 760px) {
+  .bossHealth { top: 21px; width: 132px; }
+  .bossHealth > div:first-child { font-size: 7px; margin-bottom: 5px; }
+  .bossHealth > div:last-child { height: 4px; }
+}
+.bossEncounter .arenaHud { top: 16px; }
+.bossEncounter .vitals { top: 68px; }
+.bossEncounter .vital { padding: 5px 8px; }
+.bossEncounter .vitalLabel { margin-bottom: 4px; font-size: 8px; }
+.bossEncounter .vitalLabel b { font-size: 12px; }
+.bossEncounter .vitalTrack { height: 5px; }
+.bossEncounter .vitalNote { display: none; }
+@media (max-width: 760px) { .bossEncounter .vitals { top: 62px; } }
