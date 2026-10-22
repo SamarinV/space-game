@@ -216,3 +216,21 @@
   .overlay { padding: 25px 25px 95px; }
   .dialog { max-height: 100%; }
 }
+.weaponDrop { position: absolute; z-index: 4; transform: translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid #deb4ff; border-radius: 9px; color: #f3dbff; background: #4e2d75; box-shadow: 0 0 20px #c682ff66; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 2px; }
+.weaponDrop b { font: bold 20px monospace; }
+.weaponDrop span { color: #c5f799; font-size: 17px; }
+.weaponStatus { position: absolute; z-index: 5; left: 26px; bottom: 108px; font: 10px monospace; color: #e6ceff; pointer-events: none; }
+.weaponStatus > span { display: inline-block; padding: 4px 6px; margin-right: 6px; border: 1px solid #a77cca; border-radius: 4px; background: #23172cdd; }
+.plasma { width: 6px; height: 21px; background: #efc2ff; box-shadow: 0 0 13px #dd8aff; }
+.boss { position: absolute; width: 180px; height: 105px; object-fit: contain; transform: translate(-50%, -50%); z-index: 3; filter: drop-shadow(0 0 18px #d897c044); pointer-events: none; }
+.bossHealth { position: absolute; z-index: 5; top: 118px; left: 50%; transform: translateX(-50%); width: min(310px, 75%); pointer-events: none; }
+.bossHealth > div:first-child { display: flex; justify-content: space-between; color: #f2b4d8; font: 9px monospace; margin-bottom: 5px; letter-spacing: .6px; }
+.bossHealth > div:last-child { height: 5px; background: #4d354d; border-radius: 4px; overflow: hidden; }
+.bossHealth i { display: block; height: 100%; background: linear-gradient(90deg, #ad79da, #ffadd9); }
+@media (max-width: 760px) {
+  .weaponStatus { left: 12px; bottom: 88px; font-size: 9px; }
+  .bossHealth { top: 138px; width: 75%; }
+  .bossHealth > div:first-child { font-size: 8px; letter-spacing: 0; }
+}
+.bossHealth { top: 145px; }
+@media (max-width: 760px) { .bossHealth { top: 138px; } }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { collect, cost, createRun, hullRecovery, shieldCapacity, step, storm, upgrade, wave } from './engine'
+import { collect, collectWeapon, cost, createRun, encounterTime, hullRecovery, shieldCapacity, step, storm, upgrade, wave, weaponNames } from './engine'
 import type { Input, Run } from './engine'
 import ship from '../assets/images/ship.png'
 import enemy from '../assets/images/enemy1.png'
@@ -7,6 +7,7 @@ import asteroid from '../assets/images/asteroid.png'
 import coin from '../assets/images/ruble.png'
 import drone from '../assets/images/drone.png'
 import shield from '../assets/images/shield.png'
+import bossImage from '../assets/images/boss.svg'
 import musicFile from '../assets/sounds/space.mp3'
 import { playSound, setSoundEnabled } from '../components/sound/soundManager'
 import s from './game.module.scss'
@@ -19,13 +20,13 @@ function readSaved(key: string, fallback: string) { try { return localStorage.ge
 const timeLabel = (time: number) => `${Math.floor(time / 60).toString().padStart(2, '0')}:${Math.floor(time % 60).toString().padStart(2, '0')}`
 const stars = Array.from({ length: 65 }, (_, i) => ({ left: `${(i * 37.71) % 100}%`, top: `${(i * 19.37) % 100}%`, opacity: .2 + i % 5 * .14, width: i % 4 === 0 ? 2 : 1 }))
 
-export default function Game() {
+export default function Game({ initialRun }: { initialRun?: Run } = {}) {
   const arena = useRef<HTMLDivElement>(null)
-  const model = useRef(createRun())
+  const model = useRef(initialRun ?? createRun())
   const input = useRef<Input>({ dx: 0, dy: 0, target: null })
   const keys = useRef(new Set<string>())
   const music = useRef<HTMLAudioElement | null>(null)
-  const [run, setRun] = useState<Run>(() => createRun())
+  const [run, setRun] = useState<Run>(() => initialRun ?? createRun())
   const [best, setBest] = useState(() => Math.max(0, Number(readSaved('orbit-best', '0')) || 0))
   const [muted, setMuted] = useState(() => readSaved('orbit-muted', 'false') === 'true')
   const [help, setHelp] = useState(false)
@@ -34,6 +35,7 @@ export default function Game() {
   const [screenNote, setScreenNote] = useState('')
   const active = run.phase === 'playing'
   const isStorm = storm(run)
+  const boss = run.entities.find(e => e.kind === 'boss')
   const publish = () => setRun({ ...model.current, entities: [...model.current.entities] })
   const start = () => {
     const old = model.current
@@ -56,6 +58,9 @@ export default function Game() {
     const before = model.current.collected
     collect(model.current, id)
     if (model.current.collected > before) { playSound('coin'); publish() }
+  }
+  const pickWeapon = (id: number) => {
+    if (collectWeapon(model.current, id)) { playSound('levelUp'); publish() }
   }
   const buy = (kind: 'shield' | 'drone') => { if (upgrade(model.current, kind)) { playSound('levelUp'); publish() } }
   const toggleFullscreen = async () => {
@@ -103,10 +108,11 @@ export default function Game() {
   useEffect(() => {
     let frame = 0, last = 0
     const loop = (now: number) => {
-      const r = model.current, wasPlaying = r.phase === 'playing', previousHp = r.hp, previousKills = r.kills, previousCoins = r.collected
+      const r = model.current, wasPlaying = r.phase === 'playing', previousHp = r.hp, previousKills = r.kills, previousCoins = r.collected, previousWeapon = r.weaponLevel
       step(r, last ? (now - last) / 1000 : 0, input.current)
       if (r.hp < previousHp || r.kills > previousKills) playSound('hit')
       if (r.collected > previousCoins) playSound('coin')
+      if (r.weaponLevel > previousWeapon) playSound('levelUp')
       if (wasPlaying) setRun({ ...r, entities: [...r.entities] })
       last = now; frame = requestAnimationFrame(loop)
     }
@@ -200,9 +206,15 @@ export default function Game() {
               </div>
               <span className={s.vitalMoney}>{run.money} ₽</span>
             </div>}
-            {active && <div className={`${s.stormLabel} ${isStorm ? s.warning : ''}`}>{isStorm ? '☄ АСТЕРОИДНОЕ ПОЛЕ · УКЛОНЯЙТЕСЬ' : `ДО АСТЕРОИДОВ ${Math.ceil(35 - run.time % 44)} С`}</div>}
+            {active && <div className={`${s.stormLabel} ${isStorm ? s.warning : ''}`}>{boss ? 'БОСС · СТРАЖ ОРБИТЫ' : isStorm ? '☄ АСТЕРОИДНОЕ ПОЛЕ · УКЛОНЯЙТЕСЬ' : `ДО АСТЕРОИДОВ ${Math.ceil(35 - encounterTime(run) % 44)} С`}</div>}
+            {active && boss && <div className={s.bossHealth}>
+              <div><span>СТРАЖ ОРБИТЫ · {run.bossCycle}</span><b>{Math.max(0, boss.hp ?? 0)} / {boss.maxHp}</b></div>
+              <div role="progressbar" aria-label="Прочность босса" aria-valuemin={0} aria-valuemax={boss.maxHp} aria-valuenow={Math.max(0, boss.hp ?? 0)}><i style={{ width: `${(boss.hp ?? 0) / (boss.maxHp ?? 1) * 100}%` }} /></div>
+            </div>}
             {run.entities.map(e => {
-              if (e.kind === 'bullet' || e.kind === 'hostile') return <i key={e.id} className={e.kind === 'bullet' ? s.bullet : s.hostile} style={{ left: e.x, top: e.y }} />
+              if (e.kind === 'bullet' || e.kind === 'hostile') return <i key={e.id} className={e.kind === 'bullet' ? `${s.bullet} ${e.power === 2 ? s.plasma : ''}` : s.hostile} style={{ left: e.x, top: e.y }} />
+              if (e.kind === 'weapon') return <button key={e.id} className={s.weaponDrop} style={{ left: e.x, top: e.y }} aria-label="Подобрать улучшение оружия" disabled={!active} onPointerDown={event => { event.stopPropagation(); pickWeapon(e.id) }} onClick={event => { if (event.detail === 0) pickWeapon(e.id) }}><b>W</b><span>↑</span></button>
+              if (e.kind === 'boss') return <img key={e.id} className={s.boss} src={bossImage} alt="Босс — Страж орбиты" style={{ left: e.x, top: e.y }} draggable={false} />
               if (e.kind === 'coin') return <button key={e.id} className={s.coin} style={{ left: e.x, top: e.y }} aria-label="Собрать 10 рублей" disabled={!active} onPointerDown={event => { event.stopPropagation(); collectCoin(e.id) }} onClick={event => { if (event.detail === 0) collectCoin(e.id) }}><img src={coin} alt="" /></button>
               return <div key={e.id} className={s.target} style={{ left: e.x, top: e.y }}>
                 <img className={e.kind === 'enemy' ? s.enemy : s.asteroid} src={e.kind === 'enemy' ? enemy : asteroid} alt={e.kind === 'enemy' ? 'Вражеский корабль' : 'Астероид'} draggable={false} />
@@ -218,11 +230,12 @@ export default function Game() {
             {(run.phase !== 'playing' || help) && <div className={s.overlay}><div className={s.dialog}>
               <span className={s.eyebrow}>{help ? 'БОРТОВОЙ СПРАВОЧНИК' : run.phase === 'over' ? 'СВЯЗЬ ПОТЕРЯНА' : run.phase === 'paused' ? 'МОЖНО ВЫДОХНУТЬ' : 'АРКАДНЫЙ КОСМИЧЕСКИЙ ШУТЕР'}</span>
               <h1>{help ? <>Ваш корабль.<br />Ваши правила.</> : run.phase === 'over' ? 'Хороший полёт.' : run.phase === 'paused' ? 'На паузе.' : <>За пределами<br /><em>знакомых орбит.</em></>}</h1>
-              <p>{help ? 'Двигайтесь с помощью WASD или стрелок. На телефоне ведите пальцем по полю. Орудие стреляет раз в 0,55 с. Враги выдерживают 3 попадания и стреляют в вашу позицию. Астероидам нужно 8 попаданий — их проще облететь. Красные снаряды нельзя сбить. Щит и дроны восстанавливаются только после 6 с без урона. Покупайте модули кнопками внизу поля. Пробел / P / Esc — пауза.' : run.phase === 'over' ? `Счёт ${run.score} · ${timeLabel(run.time)} в космосе · Сектор ${wave(run)}. Улучшайте защиту, чтобы продержаться дольше.` : run.phase === 'paused' ? 'Купите модули кнопками внизу поля или продолжите полёт.' : 'Пилотируйте. Собирайте. Улучшайте.\nКак далеко вы сможете зайти?'}</p>
+              <p>{help ? 'Двигайтесь с помощью WASD или стрелок. На телефоне ведите пальцем по полю. Орудие стреляет раз в 0,55 с. Враги выдерживают 3 попадания и стреляют в вашу позицию. Астероидам нужно 8 попаданий — их проще облететь. Красные снаряды нельзя сбить. Щит и дроны восстанавливаются только после 6 с без урона. Из врагов с шансом 20% выпадает W: двойной выстрел → тройной веер → плазма. Подберите кораблём или нажатием. Урон, даже по щиту, сбрасывает оружие. После астероидов появляется босс с тремя пушками. Покупайте модули кнопками внизу поля. Пробел / P / Esc — пауза.' : run.phase === 'over' ? `Счёт ${run.score} · ${timeLabel(run.time)} в космосе · Сектор ${wave(run)}. Улучшайте защиту, чтобы продержаться дольше.` : run.phase === 'paused' ? 'Купите модули кнопками внизу поля или продолжите полёт.' : 'Пилотируйте. Собирайте. Улучшайте.\nКак далеко вы сможете зайти?'}</p>
               <button className={s.primary} onClick={() => { if (help) setHelp(false); else if (run.phase === 'paused') pause(); else start() }}>{help ? 'Всё понятно' : run.phase === 'paused' ? 'Продолжить полёт' : run.phase === 'over' ? 'Ещё один полёт' : 'Начать полёт'} <span>↗</span></button>
               {run.phase === 'ready' && !help && <div className={s.introHint}><kbd>W A S D</kbd><span>или стрелки · на телефоне — касание<br />автострельба · уклоняйтесь от красных снарядов</span></div>}
               {run.phase === 'over' && !help && <span className={s.result}>Целей уничтожено: {run.kills} · Монет собрано: {run.collected}</span>}
             </div></div>}
+            {active && <div className={s.weaponStatus} aria-label={`Оружие: ${weaponNames[run.weaponLevel]}`}><span>W {run.weaponLevel}/3</span> {weaponNames[run.weaponLevel]}</div>}
             <div className={s.moduleDock} onPointerDown={event => event.stopPropagation()} aria-label="Улучшения корабля">
               {(['shield', 'drone'] as const).map(kind => {
                 const level = kind === 'shield' ? run.shieldLevel : run.droneLevel
