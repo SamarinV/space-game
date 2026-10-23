@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { collect, collectWeapon, cost, createRun, encounterTime, hullRecovery, shieldCapacity, step, storm, upgrade, wave, weaponNames } from './engine'
-import type { Input, Run } from './engine'
-import ship from '../assets/images/ship.webp'
-import enemy from '../assets/images/enemy1.webp'
 import asteroid from '../assets/images/asteroid.webp'
-import coin from '../assets/images/ruble.webp'
-import drone from '../assets/images/drone.webp'
-import shield from '../assets/images/shield.webp'
 import bossImage from '../assets/images/boss.svg'
+import drone from '../assets/images/drone.webp'
+import enemy from '../assets/images/enemy1.webp'
+import coin from '../assets/images/ruble.webp'
+import shield from '../assets/images/shield.webp'
+import ship from '../assets/images/ship.webp'
 import musicFile from '../assets/sounds/space.mp3'
 import { playSound, setSoundEnabled } from '../components/sound/soundManager'
-import s from './game.module.scss'
 import { preloadImages } from './assets'
+import type { Input, Run } from './engine'
+import { collect, collectWeapon, cost, createRun, encounterTime, hullRecovery, shieldCapacity, step, storm, upgrade, wave, weaponNames } from './engine'
+import s from './game.module.scss'
 
 // Compatibility with the original standalone components.
 export type SpawnElementsType = { id: number; x: number; y: number }
@@ -60,6 +60,7 @@ export default function Game({ initialRun }: { initialRun?: Run } = {}) {
       music.current.currentTime = 0
       music.current.play().catch(() => {})
     }
+    if (!expanded && !document.fullscreenElement) void toggleFullscreen()
   }
   const pause = () => {
     if (model.current.phase === 'playing') model.current.phase = 'paused'
