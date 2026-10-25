@@ -24,6 +24,11 @@
         { id: 2, kind: 'boss', x: 450, y: bossAltitude, speed: 0, hp: 42, maxHp: 42, age: 4, cooldown: 3 },
       ]
       run.nextId = 3
+      if (new URLSearchParams(location.search).has('defeat')) {
+        run.hp = 1
+        run.shield = 0
+        run.entities.push({ id: run.nextId++, kind: 'hostile', x: run.x, y: run.y, speed: 0 })
+      }
       createRoot(document.getElementById('root')).render(React.createElement(Game, { initialRun: run }))
     </script>
   </body>

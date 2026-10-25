@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>ORBIT — нагрузочная проверка</title></head>
+<body>
+  <div id="root"></div>
+  <output id="metrics" style="position:fixed;right:8px;bottom:8px;z-index:9999;background:#101820;color:white;padding:8px;font:10px monospace">Измерение…</output>
+  <script type="module">
+    import React, { Profiler } from 'react'
+    import { createRoot } from 'react-dom/client'
+    import Game from '/src/game/game.tsx'
+    import { createRun } from '/src/game/engine.ts'
+    import '/src/index.css'
+
+    const run = createRun(900, 650, 'playing')
+    run.weaponLevel = 3
+    run.invincible = 1000
+    run.spawn = 1000
+    run.coinSpawn = 1000
+    for (let i = 0; i < 360; i++) {
+      const kind = i % 3 === 0 ? 'enemy' : i % 3 === 1 ? 'coin' : 'bullet'
+      run.entities.push({ id: run.nextId++, kind, x: 50 + (i * 71 % 800), y: 100 + (i * 37 % 300), speed: kind === 'bullet' ? -15 : 8, hp: 1000, maxHp: 1000, cooldown: 1000 })
+    }
+    let commits = 0, renderMs = 0, frames = 0, longestFrame = 0, start = 0, previous = 0
+    let finished = false
+    const onRender = (_id, _phase, actualDuration) => {
+      if (!finished) { commits++; renderMs += actualDuration }
+    }
+    createRoot(document.getElementById('root')).render(React.createElement(Profiler, { id: 'Game', onRender }, React.createElement(Game, { initialRun: run })))
+    const measure = now => {
+      if (!start) start = now
+      if (previous) longestFrame = Math.max(longestFrame, now - previous)
+      previous = now
+      frames++
+      if (now - start < 5000) requestAnimationFrame(measure)
+      else {
+        finished = true
+        document.getElementById('metrics').textContent = JSON.stringify({ commits, renderMs: Math.round(renderMs), frames, elapsedMs: Math.round(now - start), longestFrameMs: Math.round(longestFrame) })
+      }
+    }
+    requestAnimationFrame(measure)
+  </script>
+</body>
+</html>

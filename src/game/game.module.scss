@@ -251,3 +251,18 @@
 .bossEncounter .vitalTrack { height: 5px; }
 .bossEncounter .vitalNote { display: none; }
 @media (max-width: 760px) { .bossEncounter .vitals { top: 62px; } }
+/* Moving sprites keep their layout origin; only transforms change each frame. */
+.sceneSprite { left: 0; top: 0; visibility: hidden; }
+.ship.sceneSprite { will-change: transform; }
+.targetHp i { width: 100%; transform: scaleX(var(--health, 1)); transform-origin: left; }
+@media (max-width: 760px), (pointer: coarse) {
+  .starfield i:nth-child(n+25) { display: none; }
+  .starfield i, .arena::after, .planet, .shieldBubble,
+  .bullet, .hostile, .plasma, .weaponDrop, .moduleDock,
+  .hpFill, .shieldFill, .critical .hpFill { box-shadow: none; }
+  .ship > img, .enemy, .coin img, .boss, .exhaust { filter: none; }
+  .exhaust { animation: none; }
+  .effect { text-shadow: none; }
+  .overlay { backdrop-filter: none; background: #090f18d9; }
+  .vitalTrack i { transition: none; }
+}

@@ -171,10 +171,11 @@ export function step(run: Run, seconds: number, input: Input, random = Math.rand
   }
   run.entities.push(...attacks)
   const removed = new Set<number>()
+  const bullets = run.entities.filter(e => e.kind === 'bullet')
   for (const e of run.entities) {
     if (e.kind !== 'enemy' && e.kind !== 'asteroid' && e.kind !== 'boss') continue
-    for (const bullet of run.entities) {
-      if (bullet.kind !== 'bullet' || removed.has(bullet.id) || Math.abs(bullet.x - e.x) >= (e.kind === 'boss' ? 85 : 24) || Math.abs(bullet.y - e.y) >= (e.kind === 'boss' ? 45 : 30)) continue
+    for (const bullet of bullets) {
+      if (removed.has(bullet.id) || Math.abs(bullet.x - e.x) >= (e.kind === 'boss' ? 85 : 24) || Math.abs(bullet.y - e.y) >= (e.kind === 'boss' ? 45 : 30)) continue
       removed.add(bullet.id)
       e.hp = (e.hp ?? (e.kind === 'enemy' ? 3 : 8)) - (bullet.power ?? 1)
       if (e.hp <= 0) {
@@ -208,11 +209,12 @@ export function step(run: Run, seconds: number, input: Input, random = Math.rand
       if (run.invincible <= 0) { damage(run, 18); run.invincible = .45 }
     }
   }
-  for (const e of [...run.entities]) {
+  for (const e of run.entities) {
     if (e.kind === 'coin' && Math.hypot(run.x - e.x, run.y - e.y) < 44) collect(run, e.id)
     if (e.kind === 'weapon' && Math.hypot(run.x - e.x, run.y - e.y) < 40) collectWeapon(run, e.id)
   }
   run.entities = run.entities.filter(e => !removed.has(e.id) && (e.kind === 'boss' || e.y > -70) && e.y < run.height + 55 && e.x > -60 && e.x < run.width + 60)
-  run.effects = run.effects.map(e => ({ ...e, y: e.y - 25 * dt, life: e.life - dt })).filter(e => e.life > 0)
+  for (const effect of run.effects) { effect.y -= 25 * dt; effect.life -= dt }
+  run.effects = run.effects.filter(e => e.life > 0)
   if (run.hp <= 0) run.phase = 'over'
 }
